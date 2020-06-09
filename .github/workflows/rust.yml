@@ -1,5 +1,5 @@
 # Disable for now 
-on: []
+on: [push]
 
 name: Rust
 
