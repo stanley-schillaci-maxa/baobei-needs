@@ -1,0 +1,21 @@
+[package]
+name = "baobei-needs"
+version = "0.0.1"
+authors = ["Adrien Turiot <adrien.turiot@gmail.com>"]
+edition = "2018"
+description = "A little grame powered with Rust Amethyst"
+repository = "https://github.com/DidiBear/baobei-needs"
+readme = "README.md"
+license = "MIT"
+categories = ["games"]
+keywords = ["game"]
+
+[dependencies]
+amethyst = "0.15.0"
+log = { version = "0.4.8", features = ["serde"] }
+
+[features]
+default = ["vulkan"]
+empty = ["amethyst/empty"]
+metal = ["amethyst/metal"]
+vulkan = ["amethyst/vulkan"]
