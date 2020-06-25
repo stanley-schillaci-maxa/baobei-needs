@@ -1,7 +1,7 @@
 # Disable for now 
 on: [push, pull_request]
 
-name: Rust
+name: build
 
 jobs:
   pipeline:
