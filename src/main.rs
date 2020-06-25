@@ -15,11 +15,11 @@
     clippy::wildcard_enum_match_arm,
 )]
 
-mod game_play;
-mod physics;
 mod constants;
-mod rendering;
+mod game_play;
 mod inputs;
+mod physics;
+mod rendering;
 
 use game_play::GamePlay;
 use ggez::event;
