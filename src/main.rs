@@ -1,48 +1,37 @@
-#![deny(clippy::all)]
-#![deny(clippy::pedantic)]
-#![deny(clippy::nursery)]
-#![deny(clippy::cargo)]
+//! A little game
+
+// Clippy configuration
+#![deny(
+    clippy::all,
+    clippy::pedantic,
+    clippy::nursery,
+    clippy::cargo,
+    clippy::restriction
+)]
 #![allow(
-    clippy::multiple_crate_versions, // caused by amethyst
-    clippy::module_name_repetitions, // TODO: deny module_name_repetitions
-    clippy::cast_precision_loss  // TODO: deny or warn cast_precision_loss
+    clippy::multiple_crate_versions, // caused by ggez
+    clippy::implicit_return,
+    clippy::float_arithmetic,
+    clippy::wildcard_enum_match_arm,
 )]
 
-use amethyst::{
-    core::transform::TransformBundle,
-    prelude::*,
-    renderer::{
-        plugins::{RenderFlat2D, RenderToWindow},
-        types::DefaultBackend,
-        RenderingBundle,
-    },
-    utils::application_root_dir,
-    LoggerConfig,
-};
+mod game_play;
+mod physics;
+mod constants;
+mod rendering;
+mod inputs;
 
-mod state;
+use game_play::GamePlay;
+use ggez::event;
+use ggez::{ContextBuilder, GameResult};
+use std::path::PathBuf;
 
-fn main() -> amethyst::Result<()> {
-    amethyst::start_logger(LoggerConfig::default());
+pub fn main() -> GameResult {
+    let (ctx, event_loop) = &mut ContextBuilder::new("baobei-needs", "DidiBear")
+        .add_resource_path(PathBuf::from("./resources"))
+        .build()?;
 
-    let app_root = application_root_dir()?;
+    let state = &mut GamePlay::new(ctx)?;
 
-    let resources = app_root.join("resources");
-    let display_config = resources.join("display_config.ron");
-
-    let game_data = GameDataBuilder::default()
-        .with_bundle(TransformBundle::new())?
-        .with_bundle(
-            RenderingBundle::<DefaultBackend>::new()
-                .with_plugin(
-                    RenderToWindow::from_config_path(display_config)?
-                        .with_clear([0.34, 0.36, 0.52, 1.0]),
-                )
-                .with_plugin(RenderFlat2D::default()),
-        )?;
-
-    let mut game = Application::new(resources, state::MyState, game_data)?;
-    game.run();
-
-    Ok(())
+    event::run(ctx, event_loop, state)
 }
