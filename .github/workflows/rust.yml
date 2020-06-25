@@ -4,14 +4,15 @@ on: [push, pull_request]
 name: Rust
 
 jobs:
-  check:
-    name: Check
+  pipeline:
+    name: Pipeline
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
-      - name: Install xmllint
-        run: sudo apt install gcc pkg-config openssl libasound2-dev cmake build-essential python3 libfreetype6-dev libexpat1-dev libxcb-composite0-dev libssl-dev libx11-dev
+
+      - name: Install packages
+        run: sudo apt install libsdl2-dev
 
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
@@ -27,16 +28,16 @@ jobs:
           command: fmt
           args: --all -- --check
 
+      - name: Run cargo check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+
       - name: Run cargo clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
           args: -- -D warnings
-
-      - name: Run cargo check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
 
       - name: Run cargo test
         uses: actions-rs/cargo@v1
