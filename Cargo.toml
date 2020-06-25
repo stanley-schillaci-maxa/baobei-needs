@@ -13,3 +13,6 @@ keywords = ["game"]
 [dependencies]
 ggez = "0.5"
 legion = "0.2.4"
+
+[dev-dependencies]
+rusty-hook = "^0.11.2"
