@@ -1,33 +1,23 @@
 //! Manages game controllers
 
-use crate::{constants::SPEED, physics::Velocity};
-use ggez::event::{Axis, KeyCode};
+use ggez::{nalgebra::Vector2, event::{Axis, KeyCode}};
 
-/// Increases the velocity depending on the key direction
-pub fn update_velocity_key_down(velocity: &mut Velocity, keycode: KeyCode) {
+/// Return a vector oriented toward the related direction.
+pub fn key_direction(keycode: KeyCode) -> Vector2<f32> {
     match keycode {
-        KeyCode::Up => velocity.y = -SPEED,
-        KeyCode::Down => velocity.y = SPEED,
-        KeyCode::Left => velocity.x = -SPEED,
-        KeyCode::Right => velocity.x = SPEED,
-        _ => (),
+        KeyCode::Up => Vector2::new(0.0, -1.0),
+        KeyCode::Down => Vector2::new(0.0, 1.0),
+        KeyCode::Left => Vector2::new(-1.0, 0.0),
+        KeyCode::Right => Vector2::new(1.0, 0.0),
+        _ => Vector2::new(0.0, 0.0),
     }
 }
 
-/// Decreases the velocity depending on the key direction.
-pub fn update_velocity_key_up(velocity: &mut Velocity, keycode: KeyCode) {
-    match keycode {
-        KeyCode::Up | KeyCode::Down => velocity.y = 0.0,
-        KeyCode::Left | KeyCode::Right => velocity.x = 0.0,
-        _ => (),
-    }
-}
-
-/// Sets the velocity to the axis direction.
-pub fn update_velocity_gamepad_axis(velocity: &mut Velocity, axis: Axis, value: f32) {
+/// Return a vector oriented toward the related direction.
+pub fn axis_direction(axis: Axis) -> Vector2<f32> {
     match axis {
-        Axis::LeftStickX => velocity.x = value * SPEED,
-        Axis::LeftStickY => velocity.y = -value * SPEED,
-        _ => (),
+        Axis::LeftStickX => Vector2::new(1.0, 0.0),
+        Axis::LeftStickY => Vector2::new(0.0, -1.0),
+        _ => Vector2::new(0.0, 0.0),
     }
 }

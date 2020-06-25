@@ -1,14 +1,14 @@
 //! The main game state
 
 use crate::{
-    inputs::{update_velocity_gamepad_axis, update_velocity_key_down, update_velocity_key_up},
+    constants::SPEED,
+    inputs::{axis_direction, key_direction},
     physics, rendering,
 };
 use event::{Axis, GamepadId, KeyCode, KeyMods};
 use ggez::event;
 use ggez::graphics;
-use ggez::nalgebra as na;
-use ggez::{timer, Context, GameResult};
+use ggez::{nalgebra::Vector2, timer, Context, GameResult};
 use graphics::{DrawParam, Image};
 use legion::prelude::*;
 use physics::{Position, Velocity};
@@ -41,7 +41,7 @@ impl GamePlay {
                 Velocity::new(0.0, 0.0),
                 Rendering {
                     sprite: Image::new(ctx, "/didi.png")?,
-                    param: DrawParam::new().scale(na::Vector2::new(0.5, 0.5)),
+                    param: DrawParam::new().scale(Vector2::new(0.5, 0.5)),
                 },
             )],
         );
@@ -51,7 +51,7 @@ impl GamePlay {
                 Position::new(300.0, 300.0),
                 Rendering {
                     sprite: Image::new(ctx, "/baobei.png")?,
-                    param: DrawParam::new().scale(na::Vector2::new(0.5, 0.5)),
+                    param: DrawParam::new().scale(Vector2::new(0.5, 0.5)),
                 },
             )],
         );
@@ -79,7 +79,10 @@ impl event::EventHandler for GamePlay {
         graphics::present(ctx)
     }
 
-    fn key_down_event(&mut self, ctx: &mut Context, keycode: KeyCode, _: KeyMods, _: bool) {
+    fn key_down_event(&mut self, ctx: &mut Context, keycode: KeyCode, _: KeyMods, repeat: bool) {
+        if repeat {
+            return;
+        }
         if keycode == KeyCode::Escape {
             event::quit(ctx);
         }
@@ -87,7 +90,7 @@ impl event::EventHandler for GamePlay {
         let query = Write::<Velocity>::query().filter(tag_value(&Entity::Didi));
 
         for mut velocity in query.iter_mut(&mut self.world) {
-            update_velocity_key_down(velocity.as_mut(), keycode);
+            *velocity += SPEED * key_direction(keycode);
         }
     }
 
@@ -95,7 +98,7 @@ impl event::EventHandler for GamePlay {
         let query = Write::<Velocity>::query().filter(tag_value(&Entity::Didi));
 
         for mut velocity in query.iter_mut(&mut self.world) {
-            update_velocity_key_up(velocity.as_mut(), keycode);
+            *velocity -= SPEED * key_direction(keycode);
         }
     }
 
@@ -103,7 +106,7 @@ impl event::EventHandler for GamePlay {
         let query = Write::<Velocity>::query().filter(tag_value(&Entity::Didi));
 
         for mut velocity in query.iter_mut(&mut self.world) {
-            update_velocity_gamepad_axis(velocity.as_mut(), axis, value);
+            *velocity = SPEED * value * axis_direction(axis);
         }
     }
 }
