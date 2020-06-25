@@ -10,8 +10,6 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
-      - name: Install xmllint
-        run: sudo apt install gcc pkg-config openssl libasound2-dev cmake build-essential python3 libfreetype6-dev libexpat1-dev libxcb-composite0-dev libssl-dev libx11-dev
 
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
