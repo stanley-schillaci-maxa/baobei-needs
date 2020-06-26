@@ -21,8 +21,8 @@ impl Keyboard {
     pub fn press_key(self: &mut Self, keycode: KeyCode) {
         self.pressed_keys.insert(keycode);
     }
-    /// Unpresses a key
-    pub fn unpress_key(self: &mut Self, keycode: KeyCode) {
+    /// Releases a key
+    pub fn release_key(self: &mut Self, keycode: KeyCode) {
         self.pressed_keys.remove(&keycode);
     }
 

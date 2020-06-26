@@ -106,7 +106,7 @@ impl event::EventHandler for GamePlay {
     }
 
     fn key_up_event(&mut self, _ctx: &mut Context, keycode: KeyCode, _: KeyMods) {
-        self.keyboard.unpress_key(keycode);
+        self.keyboard.release_key(keycode);
         self.update_key_velocity();
     }
 
