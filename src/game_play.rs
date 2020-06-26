@@ -1,10 +1,6 @@
 //! The main game state
 
-use crate::{
-    constants::SPEED,
-    inputs::{axis_direction, key_direction},
-    physics, rendering,
-};
+use crate::{constants::SPEED, inputs::key_direction, physics, rendering};
 use event::{Axis, GamepadId, KeyCode, KeyMods};
 use ggez::event;
 use ggez::graphics;
@@ -13,11 +9,14 @@ use graphics::{DrawParam, Image};
 use legion::prelude::*;
 use physics::{Position, Velocity};
 use rendering::Rendering;
+use std::collections::HashSet;
 
 /// Game state for the main game play.
 pub struct GamePlay {
-    /// ECS world
+    /// ECS world containing entities.
     world: World,
+    /// Set of keys that are being pressed.
+    pressed_keys: HashSet<KeyCode>,
 }
 
 /// Tags for the main entities.
@@ -41,7 +40,7 @@ impl GamePlay {
                 Velocity::new(0.0, 0.0),
                 Rendering {
                     sprite: Image::new(ctx, "/didi.png")?,
-                    param: DrawParam::new().scale(Vector2::new(0.5, 0.5)),
+                    param: DrawParam::new().scale(Vector2::new(0.3, 0.3)),
                 },
             )],
         );
@@ -51,12 +50,33 @@ impl GamePlay {
                 Position::new(300.0, 300.0),
                 Rendering {
                     sprite: Image::new(ctx, "/baobei.png")?,
-                    param: DrawParam::new().scale(Vector2::new(0.5, 0.5)),
+                    param: DrawParam::new().scale(Vector2::new(0.3, 0.3)),
                 },
             )],
         );
 
-        Ok(Self { world })
+        let state = Self {
+            world,
+            pressed_keys: HashSet::new(),
+        };
+
+        Ok(state)
+    }
+
+    /// Updates velocity of Didi depending on the key pressed
+    fn update_key_velocity(self: &mut Self) {
+        let direction: Vector2<_> = self.pressed_keys.iter().map(|&k| key_direction(k)).sum();
+
+        self.update_didi_velocity(|_| direction * SPEED);
+    }
+
+    /// Updates Didi's velocity to the one returned by the closure
+    fn update_didi_velocity(self: &mut Self, new_velocity: impl Fn(Velocity) -> Velocity) {
+        let query = Write::<Velocity>::query().filter(tag_value(&Entity::Didi));
+
+        for mut velocity in query.iter_mut(&mut self.world) {
+            *velocity = new_velocity(*velocity);
+        }
     }
 }
 
@@ -79,34 +99,24 @@ impl event::EventHandler for GamePlay {
         graphics::present(ctx)
     }
 
-    fn key_down_event(&mut self, ctx: &mut Context, keycode: KeyCode, _: KeyMods, repeat: bool) {
-        if repeat {
-            return;
-        }
+    fn key_down_event(&mut self, ctx: &mut Context, keycode: KeyCode, _: KeyMods, _: bool) {
         if keycode == KeyCode::Escape {
             event::quit(ctx);
         }
-
-        let query = Write::<Velocity>::query().filter(tag_value(&Entity::Didi));
-
-        for mut velocity in query.iter_mut(&mut self.world) {
-            *velocity += SPEED * key_direction(keycode);
-        }
+        self.pressed_keys.insert(keycode);
+        self.update_key_velocity();
     }
 
     fn key_up_event(&mut self, _ctx: &mut Context, keycode: KeyCode, _: KeyMods) {
-        let query = Write::<Velocity>::query().filter(tag_value(&Entity::Didi));
-
-        for mut velocity in query.iter_mut(&mut self.world) {
-            *velocity -= SPEED * key_direction(keycode);
-        }
+        self.pressed_keys.remove(&keycode);
+        self.update_key_velocity();
     }
 
     fn gamepad_axis_event(&mut self, _ctx: &mut Context, axis: Axis, value: f32, _: GamepadId) {
-        let query = Write::<Velocity>::query().filter(tag_value(&Entity::Didi));
-
-        for mut velocity in query.iter_mut(&mut self.world) {
-            *velocity = SPEED * value * axis_direction(axis);
-        }
+        self.update_didi_velocity(|velocity| match axis {
+            Axis::LeftStickX => Velocity::new(value * SPEED, velocity.y),
+            Axis::LeftStickY => Velocity::new(velocity.x, -value * SPEED),
+            _ => velocity,
+        });
     }
 }
