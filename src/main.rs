@@ -16,8 +16,8 @@
 )]
 
 mod constants;
+mod controllers;
 mod game_play;
-mod inputs;
 mod physics;
 mod rendering;
 

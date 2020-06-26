@@ -1,6 +1,6 @@
 //! The main game state
 
-use crate::{constants::SPEED, inputs::key_direction, physics, rendering};
+use crate::{constants::SPEED, controllers::Keyboard, physics, rendering};
 use event::{Axis, GamepadId, KeyCode, KeyMods};
 use ggez::event;
 use ggez::graphics;
@@ -9,14 +9,13 @@ use graphics::{DrawParam, Image};
 use legion::prelude::*;
 use physics::{Position, Velocity};
 use rendering::Rendering;
-use std::collections::HashSet;
 
 /// Game state for the main game play.
 pub struct GamePlay {
     /// ECS world containing entities.
     world: World,
-    /// Set of keys that are being pressed.
-    pressed_keys: HashSet<KeyCode>,
+    /// The keyboard the player is using.
+    keyboard: Keyboard,
 }
 
 /// Tags for the main entities.
@@ -57,7 +56,7 @@ impl GamePlay {
 
         let state = Self {
             world,
-            pressed_keys: HashSet::new(),
+            keyboard: Keyboard::new(),
         };
 
         Ok(state)
@@ -65,8 +64,7 @@ impl GamePlay {
 
     /// Updates velocity of Didi depending on the key pressed
     fn update_key_velocity(self: &mut Self) {
-        let direction: Vector2<_> = self.pressed_keys.iter().map(|&k| key_direction(k)).sum();
-
+        let direction = self.keyboard.arrow_direction();
         self.update_didi_velocity(|_| direction * SPEED);
     }
 
@@ -103,12 +101,12 @@ impl event::EventHandler for GamePlay {
         if keycode == KeyCode::Escape {
             event::quit(ctx);
         }
-        self.pressed_keys.insert(keycode);
+        self.keyboard.press_key(keycode);
         self.update_key_velocity();
     }
 
     fn key_up_event(&mut self, _ctx: &mut Context, keycode: KeyCode, _: KeyMods) {
-        self.pressed_keys.remove(&keycode);
+        self.keyboard.unpress_key(keycode);
         self.update_key_velocity();
     }
 
