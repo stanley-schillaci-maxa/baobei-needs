@@ -14,6 +14,8 @@ pub struct Rendering {
     pub sprite: Image,
     /// Drawing info e.g. position or scale
     pub param: DrawParam,
+    /// Order of the sprite, low = background and high = foreground.
+    pub order: i32,
 }
 
 /// Update the position of the sprite depending on the entity position
@@ -25,11 +27,15 @@ pub fn update(world: &mut World) {
     }
 }
 
-/// Draw all entities with a rendering component
+/// Draw all entities with a rendering component.
+/// It renders them following the `order` field.
 pub fn draw(ctx: &mut Context, world: &World) -> GameResult {
     let query = Read::<Rendering>::query();
 
-    for render in query.iter(world) {
+    let mut renders: Vec<_> = query.iter(world).collect();
+    renders.sort_by_key(|r| r.order);
+
+    for render in renders {
         graphics::draw(ctx, &render.sprite, render.param)?;
     }
     Ok(())

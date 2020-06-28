@@ -46,6 +46,7 @@ impl GamePlay {
                 Rendering {
                     sprite: Image::new(ctx, "/didi.png")?,
                     param: DrawParam::new().scale(Vector2::new(0.3, 0.3)),
+                    order: 2,
                 },
             )],
         );
@@ -56,6 +57,7 @@ impl GamePlay {
                 Rendering {
                     sprite: Image::new(ctx, "/baobei.png")?,
                     param: DrawParam::new().scale(Vector2::new(0.3, 0.3)),
+                    order: 1,
                 },
             )],
         );
