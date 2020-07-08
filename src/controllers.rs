@@ -24,17 +24,17 @@ impl Keyboard {
     }
 
     /// Presses a key
-    pub fn press_key(self: &mut Self, keycode: KeyCode) {
+    pub fn press_key(&mut self, keycode: KeyCode) {
         self.pressed_keys.insert(keycode);
     }
 
     /// Releases a key
-    pub fn release_key(self: &mut Self, keycode: KeyCode) {
+    pub fn release_key(&mut self, keycode: KeyCode) {
         self.pressed_keys.remove(&keycode);
     }
 
     /// Returns a vector corresponding to the direction indicated by arrow keys.
-    pub fn arrow_direction(self: &Self) -> Direction {
+    pub fn arrow_direction(&self) -> Direction {
         self.pressed_keys
             .iter()
             .map(|&keycode| match keycode {
@@ -69,17 +69,17 @@ impl Gamepad {
     }
 
     /// Presses a button.
-    pub fn press_button(self: &mut Self, button: Button) {
+    pub fn press_button(&mut self, button: Button) {
         self.pressed_buttons.insert(button);
     }
 
     /// Releases a button.
-    pub fn release_button(self: &mut Self, button: Button) {
+    pub fn release_button(&mut self, button: Button) {
         self.pressed_buttons.remove(&button);
     }
 
     /// Update the stick corresponding to the axis toward the related direction.
-    pub fn move_axis(self: &mut Self, axis: Axis, value: f32) {
+    pub fn move_axis(&mut self, axis: Axis, value: f32) {
         match axis {
             Axis::LeftStickX => self.left_stick.x = value,
             Axis::LeftStickY => self.left_stick.y = -value,
