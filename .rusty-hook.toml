@@ -1,5 +1,5 @@
 [hooks]
-pre-commit = "cargo fmt && git add . && touch src/main.rs && cargo clippy"
+pre-commit = "cargo fmt && touch src/main.rs && cargo clippy"
 
 [logging]
 verbose = true
