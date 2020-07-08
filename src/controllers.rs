@@ -6,6 +6,9 @@ use ggez::{
 };
 use std::collections::HashSet;
 
+/// Direction vector between 0 and 1
+pub type Direction = Vector2<f32>;
+
 /// State of the keyboard
 pub struct Keyboard {
     /// Set of keys that are being pressed.
@@ -31,22 +34,19 @@ impl Keyboard {
     }
 
     /// Returns a vector corresponding to the direction indicated by arrow keys.
-    pub fn arrow_direction(self: &Self) -> Vector2<f32> {
+    pub fn arrow_direction(self: &Self) -> Direction {
         self.pressed_keys
             .iter()
             .map(|&keycode| match keycode {
-                KeyCode::Up => Vector2::new(0.0, -1.0),
-                KeyCode::Down => Vector2::new(0.0, 1.0),
-                KeyCode::Left => Vector2::new(-1.0, 0.0),
-                KeyCode::Right => Vector2::new(1.0, 0.0),
-                _ => Vector2::new(0.0, 0.0),
+                KeyCode::Up => Direction::new(0.0, -1.0),
+                KeyCode::Down => Direction::new(0.0, 1.0),
+                KeyCode::Left => Direction::new(-1.0, 0.0),
+                KeyCode::Right => Direction::new(1.0, 0.0),
+                _ => Direction::new(0.0, 0.0),
             })
             .sum()
     }
 }
-
-/// Direction vector between 0 and 1
-type Direction = Vector2<f32>;
 
 /// State of the Gamepad
 pub struct Gamepad {
