@@ -18,6 +18,7 @@
 mod constants;
 mod controllers;
 mod game_play;
+mod movement;
 mod physics;
 mod publisher;
 mod rendering;

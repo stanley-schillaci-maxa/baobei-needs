@@ -2,8 +2,11 @@
 
 use crate::{
     constants::SPEED,
-    controllers::{Gamepad, Keyboard},
-    physics, rendering,
+    controllers::{Direction, Gamepad, Keyboard},
+    movement::Movement,
+    physics,
+    publisher::Publisher,
+    rendering,
 };
 use event::{Axis, Button, GamepadId, KeyCode, KeyMods};
 use ggez::event;
@@ -22,6 +25,10 @@ pub struct GamePlay {
     keyboard: Keyboard,
     /// The gamepad the player is using.
     gamepad: Gamepad,
+    /// System that moves didi toward the input direction.
+    didi_movement: Movement<Entity>,
+    /// Publisher of movement events
+    movement_publisher: Publisher<Direction>,
 }
 
 /// Tags for the main entities.
@@ -62,21 +69,23 @@ impl GamePlay {
             )],
         );
 
+        let mut movement_publisher = Publisher::new();
+
+        let didi_movement = Movement {
+            tag: Entity::Didi,
+            speed: SPEED,
+            directions: movement_publisher.subscribe(),
+        };
+
         let state = Self {
             world,
             keyboard: Keyboard::new(),
             gamepad: Gamepad::new(),
+            didi_movement,
+            movement_publisher,
         };
 
         Ok(state)
-    }
-
-    /// Updates Didi's velocity to the one returned by the closure
-    fn update_didi_velocity(self: &mut Self, new_velocity: Velocity) {
-        Write::<Velocity>::query()
-            .filter(tag_value(&Entity::Didi))
-            .iter_mut(&mut self.world)
-            .for_each(|mut velocity| *velocity = new_velocity);
     }
 }
 
@@ -87,6 +96,7 @@ impl event::EventHandler for GamePlay {
 
         physics::update(dt, world);
         rendering::update(world);
+        self.didi_movement.update(world);
 
         Ok(())
     }
@@ -104,20 +114,19 @@ impl event::EventHandler for GamePlay {
             event::quit(ctx);
         }
         self.keyboard.press_key(keycode);
-
-        self.update_didi_velocity(self.keyboard.arrow_direction() * SPEED);
+        self.movement_publisher
+            .publish(self.keyboard.arrow_direction());
     }
 
     fn key_up_event(&mut self, _: &mut Context, keycode: KeyCode, _: KeyMods) {
         self.keyboard.release_key(keycode);
-
-        self.update_didi_velocity(self.keyboard.arrow_direction() * SPEED);
+        self.movement_publisher
+            .publish(self.keyboard.arrow_direction());
     }
 
     fn gamepad_axis_event(&mut self, _: &mut Context, axis: Axis, value: f32, _: GamepadId) {
         self.gamepad.move_axis(axis, value);
-
-        self.update_didi_velocity(self.gamepad.left_stick * SPEED);
+        self.movement_publisher.publish(self.gamepad.left_stick);
     }
 
     fn gamepad_button_down_event(&mut self, _: &mut Context, button: Button, _: GamepadId) {
