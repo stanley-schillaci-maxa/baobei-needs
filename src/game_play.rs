@@ -73,11 +73,10 @@ impl GamePlay {
 
     /// Updates Didi's velocity to the one returned by the closure
     fn update_didi_velocity(self: &mut Self, new_velocity: Velocity) {
-        let query = Write::<Velocity>::query().filter(tag_value(&Entity::Didi));
-
-        for mut velocity in query.iter_mut(&mut self.world) {
-            *velocity = new_velocity;
-        }
+        Write::<Velocity>::query()
+            .filter(tag_value(&Entity::Didi))
+            .iter_mut(&mut self.world)
+            .for_each(|mut velocity| *velocity = new_velocity);
     }
 }
 

@@ -12,11 +12,9 @@ pub type Velocity = Vector2<f32>;
 
 /// Moves positions of entities depending on their velocity.
 pub fn update(dt: f32, world: &mut World) {
-    let query = <(Write<Position>, Read<Velocity>)>::query();
-
-    for (mut position, velocity) in query.iter_mut(world) {
-        *position += *velocity * dt;
-    }
+    <(Write<Position>, Read<Velocity>)>::query()
+        .iter_mut(world)
+        .for_each(|(mut position, velocity)| *position += *velocity * dt)
 }
 
 #[cfg(test)]

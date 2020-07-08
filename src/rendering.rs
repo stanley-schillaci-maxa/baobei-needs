@@ -20,11 +20,10 @@ pub struct Rendering {
 
 /// Update the position of the sprite depending on the entity position
 pub fn update(world: &mut World) {
-    let query = <(Read<Position>, Write<Rendering>)>::query().filter(changed::<Position>());
-    //                                                               ^ only changed positions
-    for (pos, mut render) in query.iter_mut(world) {
-        render.param = render.param.dest(*pos);
-    }
+    <(Read<Position>, Write<Rendering>)>::query()
+        .filter(changed::<Position>()) // only changed positions
+        .iter_mut(world)
+        .for_each(|(pos, mut render)| render.param = render.param.dest(*pos))
 }
 
 /// Draw all entities with a rendering component.
