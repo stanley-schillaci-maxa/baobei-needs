@@ -116,6 +116,7 @@ dependencies = [
 name = "baobei-needs"
 version = "0.0.1"
 dependencies = [
+ "crossbeam-channel",
  "ggez",
  "legion",
  "rusty-hook",

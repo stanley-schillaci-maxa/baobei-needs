@@ -19,6 +19,7 @@ mod constants;
 mod controllers;
 mod game_play;
 mod physics;
+mod publisher;
 mod rendering;
 
 use game_play::GamePlay;
