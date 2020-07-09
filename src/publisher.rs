@@ -2,7 +2,7 @@
 
 use crossbeam_channel::{unbounded, Receiver, Sender};
 
-/// Publisher tha can broadcast messages to subscribers.
+/// Publisher that can broadcast messages to subscribers.
 pub struct Publisher<TMessage> {
     /// Senders to open channels.
     senders: Vec<Sender<TMessage>>,
@@ -23,12 +23,11 @@ impl<TMessage: Clone> Publisher<TMessage> {
         receiver
     }
 
-    /// Broadcasts the `message` to all subscribers.
-    /// - The messages is cloned for each channel.
-    /// - Disconnected channels are removed.
+    /// Broadcasts a clone of the `message` to all subscribers.
     pub fn publish(&mut self, message: TMessage) {
         self.senders
             .retain(|sender| sender.try_send(message.clone()).is_ok());
+        //   ^ removes failing channels, mainly disconnected ones.
     }
 }
 
