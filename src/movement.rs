@@ -4,11 +4,11 @@ use crate::{controllers::Direction, physics::Velocity};
 use crossbeam_channel::Receiver;
 use legion::{prelude::*, storage::Tag};
 
-/// System that update the velocity of tagged entities toward incoming directions.
+/// System that updates the velocity of tagged entities toward incoming directions.
 pub struct Movement<TTag: Tag> {
     /// Tag of the filtered entity
     pub tag: TTag,
-    /// Subscription to directions  
+    /// Subscription to directions changes
     pub directions: Receiver<Direction>,
     /// Speed used to update the velocity
     pub speed: f32,
