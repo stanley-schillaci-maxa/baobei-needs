@@ -36,26 +36,48 @@ mod tests {
     use super::*;
     use crossbeam_channel::TryRecvError;
 
+    #[derive(Clone, Debug, PartialEq)]
+    struct Message(i32);
+
     #[test]
-    fn it_works() {
-        let mut bus = Publisher::new();
+    fn test_multiple_subscribers() {
+        let mut publisher = Publisher::new();
 
-        let receiver1 = bus.subscribe();
-        let receiver2 = bus.subscribe();
+        let receiver1 = publisher.subscribe();
+        let receiver2 = publisher.subscribe();
 
-        bus.publish(12);
+        publisher.publish(Message(12));
+        publisher.publish(Message(34));
 
-        assert_eq!(receiver1.recv(), Ok(12));
-        assert_eq!(receiver2.recv(), Ok(12));
-
+        assert_eq!(receiver1.recv(), Ok(Message(12)));
+        assert_eq!(receiver1.recv(), Ok(Message(34)));
         assert_eq!(receiver1.try_recv(), Err(TryRecvError::Empty));
+
+        assert_eq!(receiver2.recv(), Ok(Message(12)));
+        assert_eq!(receiver2.recv(), Ok(Message(34)));
         assert_eq!(receiver2.try_recv(), Err(TryRecvError::Empty));
 
-        drop(receiver1);
+        publisher.publish(Message(45));
 
-        bus.publish(62);
+        assert_eq!(receiver1.recv(), Ok(Message(45)));
+        assert_eq!(receiver1.try_recv(), Err(TryRecvError::Empty));
 
-        assert_eq!(receiver2.recv(), Ok(62));
+        assert_eq!(receiver2.recv(), Ok(Message(45)));
         assert_eq!(receiver2.try_recv(), Err(TryRecvError::Empty));
+    }
+
+    #[test]
+    fn test_disconnected_channels() {
+        let mut publisher = Publisher::new();
+
+        let receiver = publisher.subscribe();
+        let disconnected_receiver = publisher.subscribe();
+
+        drop(disconnected_receiver);
+
+        publisher.publish(62);
+
+        assert_eq!(receiver.recv(), Ok(62));
+        assert_eq!(receiver.try_recv(), Err(TryRecvError::Empty));
     }
 }
