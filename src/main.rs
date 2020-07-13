@@ -17,6 +17,7 @@
 
 mod constants;
 mod controllers;
+mod events;
 mod game_play;
 mod movement;
 mod physics;
