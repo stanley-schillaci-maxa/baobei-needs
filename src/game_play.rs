@@ -1,8 +1,10 @@
 //! The main game state
 
 use crate::{
+    collisions::{self, BoxCollider, Id},
     constants::SPEED,
     controllers::{Direction, Gamepad, Keyboard},
+    events,
     movement::Movement,
     physics,
     publisher::Publisher,
@@ -46,10 +48,11 @@ impl GamePlay {
         let mut world = Universe::new().create_world();
 
         world.insert(
-            (Entity::Didi,),
+            (Entity::Didi, Id(1)),
             vec![(
                 Position::origin(),
                 Velocity::new(0.0, 0.0),
+                BoxCollider::new(50.0, 20.0),
                 Rendering {
                     sprite: Image::new(ctx, "/didi.png")?,
                     param: DrawParam::new().scale(Vector2::new(0.3, 0.3)),
@@ -58,9 +61,10 @@ impl GamePlay {
             )],
         );
         world.insert(
-            (Entity::Baobei,),
+            (Entity::Baobei, Id(2)),
             vec![(
                 Position::new(300.0, 300.0),
+                BoxCollider::new(50.0, 20.0),
                 Rendering {
                     sprite: Image::new(ctx, "/baobei.png")?,
                     param: DrawParam::new().scale(Vector2::new(0.3, 0.3)),
@@ -94,9 +98,12 @@ impl event::EventHandler for GamePlay {
         let world = &mut self.world;
         let dt = timer::delta(ctx).as_secs_f32();
 
+        collisions::update(dt, world);
         physics::update(dt, world);
         rendering::update(world);
         self.didi_movement.update(world);
+
+        events::clear_all(world);
 
         Ok(())
     }
@@ -105,6 +112,7 @@ impl event::EventHandler for GamePlay {
         graphics::clear(ctx, graphics::BLACK);
 
         rendering::draw(ctx, &self.world)?;
+        rendering::draw_colliders(ctx, &self.world)?;
 
         graphics::present(ctx)
     }

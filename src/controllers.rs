@@ -1,9 +1,7 @@
 //! Manages game controllers such as Keyboard and Gamepad
 
-use ggez::{
-    event::{Axis, Button, KeyCode},
-    nalgebra::Vector2,
-};
+use ggez::event::{Axis, Button, KeyCode};
+use ncollide2d::nalgebra::Vector2;
 use std::collections::HashSet;
 
 /// Direction vector between 0 and 1

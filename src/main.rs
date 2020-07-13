@@ -15,6 +15,7 @@
     clippy::wildcard_enum_match_arm,
 )]
 
+mod collisions;
 mod constants;
 mod controllers;
 mod events;

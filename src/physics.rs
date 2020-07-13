@@ -2,7 +2,7 @@
 
 use legion::prelude::*;
 
-use ggez::nalgebra::{Point2, Vector2};
+use ncollide2d::nalgebra::{Point2, Vector2};
 
 /// Position of an entity
 pub type Position = Point2<f32>;
