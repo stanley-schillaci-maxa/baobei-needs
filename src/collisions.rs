@@ -12,19 +12,40 @@ use std::{
     collections::{HashMap, HashSet},
     hash::{Hash, Hasher},
     iter::once,
+    sync::atomic::{AtomicUsize, Ordering},
 };
+
+/// Sequence counter of collider ids.
+static COLLIDER_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
 /// Id tag of a entity that can be collided
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct Id(pub usize);
+struct Id(usize);
 
 /// Rectangle of
-pub struct BoxCollider(pub Cuboid<f32>);
+pub struct BoxCollider {
+    /// Unique id of the collider.
+    id: Id,
+    /// Width
+    pub width: f32,
+    /// Height
+    pub height: f32,
+    /// Actual shape used for collision computations.
+    cuboid: Cuboid<f32>,
+}
 
 impl BoxCollider {
     /// Creates a `BoxCollider` with the given `width` and `height`.
     pub fn new(width: f32, height: f32) -> Self {
-        Self(Cuboid::new(Vector2::new(width, height)))
+        let next_id = COLLIDER_COUNTER.fetch_add(1, Ordering::SeqCst);
+        let cuboid = Cuboid::new(Vector2::new(width, height));
+
+        Self {
+            id: Id(next_id),
+            width,
+            height,
+            cuboid,
+        }
     }
 }
 
@@ -74,32 +95,28 @@ pub enum CollisionEvent {
 /// TODO: Refactor to be more maintainable
 ///
 pub fn update(dt: f32, world: &mut World) {
-    let moving_colliders = <(
-        Read<Position>,
-        Read<Velocity>,
-        Read<BoxCollider>,
-        Tagged<Id>,
-    )>::query();
-
-    let other_colliders = <(Read<Position>, Read<BoxCollider>, Tagged<Id>)>::query();
+    let moving_colliders = <(Read<Position>, Read<Velocity>, Read<BoxCollider>)>::query();
+    let other_colliders = <(Read<Position>, Read<BoxCollider>)>::query();
 
     let next_collisions: HashSet<_> = moving_colliders
         .iter(world)
-        .flat_map(|(pos_1, vel_1, col_1, id_1)| {
+        .flat_map(|(pos_1, vel_1, col_1)| {
+            let id_1 = col_1.id;
+
             other_colliders
                 .iter(world)
-                .filter(move |(_, _, id_2)| id_1.0 != id_2.0)
-                .filter_map(move |(pos_2, col_2, id_2)| {
+                .filter(move |(_, col_2)| id_1 != col_2.id)
+                .filter_map(move |(pos_2, col_2)| {
                     let contact = query::contact(
                         &isometry_from(*pos_1 + (*vel_1 * dt)),
-                        &col_1.0,
+                        &col_1.cuboid,
                         &isometry_from(*pos_2),
-                        &col_2.0,
+                        &col_2.cuboid,
                         0.0,
                     );
 
                     if contact.is_some() {
-                        Some(Collision(*id_1, *id_2))
+                        Some(Collision(id_1, col_2.id))
                     } else {
                         None
                     }

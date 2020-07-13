@@ -1,7 +1,7 @@
 //! The main game state
 
 use crate::{
-    collisions::{self, BoxCollider, Id},
+    collisions::{self, BoxCollider},
     constants::SPEED,
     controllers::{Direction, Gamepad, Keyboard},
     events,
@@ -48,7 +48,7 @@ impl GamePlay {
         let mut world = Universe::new().create_world();
 
         world.insert(
-            (Entity::Didi, Id(1)),
+            (Entity::Didi,),
             vec![(
                 Position::origin(),
                 Velocity::new(0.0, 0.0),
@@ -61,7 +61,7 @@ impl GamePlay {
             )],
         );
         world.insert(
-            (Entity::Baobei, Id(2)),
+            (Entity::Baobei,),
             vec![(
                 Position::new(300.0, 300.0),
                 BoxCollider::new(50.0, 20.0),

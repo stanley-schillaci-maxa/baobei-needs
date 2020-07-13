@@ -61,8 +61,7 @@ const GREEN: Color = Color {
 /// Draws all box colliders with a green rectangle.
 pub fn draw_colliders(ctx: &mut Context, world: &World) -> GameResult {
     for (pos, col) in <(Read<Position>, Read<BoxCollider>)>::query().iter(world) {
-        let square = col.0.half_extents();
-        let rect = Rect::new(pos.x, pos.y, square.x, square.y);
+        let rect = Rect::new(pos.x, pos.y, col.width, col.height);
 
         let mesh = Mesh::new_rectangle(ctx, graphics::DrawMode::stroke(2.0), rect, GREEN)?;
         graphics::draw(ctx, &mesh, DrawParam::default())?;
