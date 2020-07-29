@@ -4,7 +4,7 @@ use crate::{
     collisions::{self, BoxCollider},
     constants::SPEED,
     controllers::{Gamepad, Keyboard},
-    events::{self, Event},
+    events::{Event, EventsExt},
     movement::{MovementEvent, MovementSystem},
     physics, rendering,
 };
@@ -93,7 +93,7 @@ impl event::EventHandler for GamePlay {
         rendering::update(world);
         self.didi_movement.update(world);
 
-        events::clear_all(world);
+        world.clear_events();
 
         Ok(())
     }

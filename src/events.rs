@@ -6,14 +6,21 @@ use legion::prelude::*;
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Event;
 
-/// Removes all events entities from the world.
-pub fn clear_all(world: &mut World) {
-    let event_entities: Vec<_> = Tagged::<Event>::query()
-        .iter_entities(world)
-        .map(|(entity, _)| entity)
-        .collect();
+/// Extends World with methods for managing event entities.
+pub trait EventsExt {
+    /// Removes all events entities from the world.
+    fn clear_events(&mut self);
+}
 
-    for entity in event_entities {
-        world.delete(entity);
+impl EventsExt for World {
+    fn clear_events(&mut self) {
+        let event_entities: Vec<_> = Tagged::<Event>::query()
+            .iter_entities(self)
+            .map(|(entity, _)| entity)
+            .collect();
+
+        for entity in event_entities {
+            self.delete(entity);
+        }
     }
 }
