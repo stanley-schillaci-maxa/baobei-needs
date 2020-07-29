@@ -3,12 +3,10 @@
 use crate::{
     collisions::{self, BoxCollider},
     constants::SPEED,
-    controllers::{Direction, Gamepad, Keyboard},
-    events,
-    movement::Movement,
-    physics,
-    publisher::Publisher,
-    rendering,
+    controllers::{Gamepad, Keyboard},
+    events::{self, Event},
+    movement::{MovementEvent, MovementSystem},
+    physics, rendering,
 };
 use event::{Axis, Button, GamepadId, KeyCode, KeyMods};
 use ggez::event;
@@ -18,6 +16,7 @@ use graphics::{DrawParam, Image};
 use legion::prelude::*;
 use physics::{Position, Velocity};
 use rendering::Rendering;
+use std::iter;
 
 /// Game state for the main game play.
 pub struct GamePlay {
@@ -28,9 +27,7 @@ pub struct GamePlay {
     /// The gamepad the player is using.
     gamepad: Gamepad,
     /// System that moves didi toward the input direction.
-    didi_movement: Movement<Entity>,
-    /// Publisher of movement events
-    movement_publisher: Publisher<Direction>,
+    didi_movement: MovementSystem<Entity>,
 }
 
 /// Tags for the main entities.
@@ -73,20 +70,13 @@ impl GamePlay {
             )],
         );
 
-        let mut movement_publisher = Publisher::new();
-
-        let didi_movement = Movement {
-            tag: Entity::Didi,
-            speed: SPEED,
-            directions: movement_publisher.subscribe(),
-        };
+        let didi_movement = MovementSystem::new(&mut world, Entity::Didi, SPEED);
 
         let state = Self {
             world,
             keyboard: Keyboard::new(),
             gamepad: Gamepad::new(),
             didi_movement,
-            movement_publisher,
         };
 
         Ok(state)
@@ -122,19 +112,23 @@ impl event::EventHandler for GamePlay {
             event::quit(ctx);
         }
         self.keyboard.press_key(keycode);
-        self.movement_publisher
-            .publish(self.keyboard.arrow_direction());
+
+        let movement = MovementEvent(self.keyboard.arrow_direction());
+        self.world.insert((Event,), iter::once((movement,)));
     }
 
     fn key_up_event(&mut self, _: &mut Context, keycode: KeyCode, _: KeyMods) {
         self.keyboard.release_key(keycode);
-        self.movement_publisher
-            .publish(self.keyboard.arrow_direction());
+
+        let movement = MovementEvent(self.keyboard.arrow_direction());
+        self.world.insert((Event,), iter::once((movement,)));
     }
 
     fn gamepad_axis_event(&mut self, _: &mut Context, axis: Axis, value: f32, _: GamepadId) {
         self.gamepad.move_axis(axis, value);
-        self.movement_publisher.publish(self.gamepad.left_stick);
+
+        let movement = MovementEvent(self.gamepad.left_stick);
+        self.world.insert((Event,), iter::once((movement,)));
     }
 
     fn gamepad_button_down_event(&mut self, _: &mut Context, button: Button, _: GamepadId) {
