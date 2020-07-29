@@ -2,7 +2,7 @@
 
 use legion::prelude::*;
 
-use crate::events::Event;
+use crate::events::EventsExt;
 use crate::physics::{Position, Velocity};
 use ncollide2d::nalgebra::{Isometry2, Vector2};
 use ncollide2d::query;
@@ -133,17 +133,14 @@ pub fn update(dt: f32, world: &mut World) {
 
     for &new_collision in next_collisions.difference(&prev_collisions) {
         dbg!(new_collision);
-        world.insert((Event,), once((CollisionEvent::Entering(new_collision),)));
+        world.insert_event(CollisionEvent::Entering(new_collision));
         world.insert((), once((new_collision,)));
     }
 
     for finished_collision in prev_collisions.difference(&next_collisions) {
         dbg!(finished_collision);
 
-        world.insert(
-            (Event,),
-            once((CollisionEvent::Exiting(*finished_collision),)),
-        );
+        world.insert_event(CollisionEvent::Exiting(*finished_collision));
 
         if let Some(&entity) = prev_entities.get(finished_collision) {
             world.delete(entity);

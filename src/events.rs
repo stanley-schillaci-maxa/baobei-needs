@@ -1,6 +1,7 @@
 //! Types and helpers for interacting with appearing events.
 
-use legion::prelude::*;
+use legion::{prelude::*, storage::Component};
+use std::iter::once;
 
 /// Static tag to assign event entities with.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -8,11 +9,18 @@ pub struct Event;
 
 /// Extends World with methods for managing event entities.
 pub trait EventsExt {
+    /// Insert an event to the world.
+    fn insert_event<TEvent: Component>(&mut self, event: TEvent);
+
     /// Removes all events entities from the world.
     fn clear_events(&mut self);
 }
 
 impl EventsExt for World {
+    fn insert_event<TEvent: Component>(&mut self, event: TEvent) {
+        self.insert((Event,), once((event,)));
+    }
+
     fn clear_events(&mut self) {
         let event_entities: Vec<_> = Tagged::<Event>::query()
             .iter_entities(self)

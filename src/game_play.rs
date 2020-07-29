@@ -4,7 +4,7 @@ use crate::{
     collisions::{self, BoxCollider},
     constants::SPEED,
     controllers::{Gamepad, Keyboard},
-    events::{Event, EventsExt},
+    events::EventsExt,
     movement::{MovementEvent, MovementSystem},
     physics, rendering,
 };
@@ -114,21 +114,21 @@ impl event::EventHandler for GamePlay {
         self.keyboard.press_key(keycode);
 
         let movement = MovementEvent(self.keyboard.arrow_direction());
-        self.world.insert((Event,), once((movement,)));
+        self.world.insert_event(movement);
     }
 
     fn key_up_event(&mut self, _: &mut Context, keycode: KeyCode, _: KeyMods) {
         self.keyboard.release_key(keycode);
 
         let movement = MovementEvent(self.keyboard.arrow_direction());
-        self.world.insert((Event,), once((movement,)));
+        self.world.insert_event(movement);
     }
 
     fn gamepad_axis_event(&mut self, _: &mut Context, axis: Axis, value: f32, _: GamepadId) {
         self.gamepad.move_axis(axis, value);
 
         let movement = MovementEvent(self.gamepad.left_stick);
-        self.world.insert((Event,), once((movement,)));
+        self.world.insert_event(movement);
     }
 
     fn gamepad_button_down_event(&mut self, _: &mut Context, button: Button, _: GamepadId) {
