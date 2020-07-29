@@ -16,7 +16,7 @@ use graphics::{DrawParam, Image};
 use legion::prelude::*;
 use physics::{Position, Velocity};
 use rendering::Rendering;
-use std::iter;
+use std::iter::once;
 
 /// Game state for the main game play.
 pub struct GamePlay {
@@ -46,7 +46,7 @@ impl GamePlay {
 
         world.insert(
             (Entity::Didi,),
-            vec![(
+            once((
                 Position::origin(),
                 Velocity::new(0.0, 0.0),
                 BoxCollider::new(50.0, 20.0),
@@ -55,11 +55,11 @@ impl GamePlay {
                     param: DrawParam::new().scale(Vector2::new(0.3, 0.3)),
                     order: 2,
                 },
-            )],
+            )),
         );
         world.insert(
             (Entity::Baobei,),
-            vec![(
+            once((
                 Position::new(300.0, 300.0),
                 BoxCollider::new(50.0, 20.0),
                 Rendering {
@@ -67,7 +67,7 @@ impl GamePlay {
                     param: DrawParam::new().scale(Vector2::new(0.3, 0.3)),
                     order: 1,
                 },
-            )],
+            )),
         );
 
         let didi_movement = MovementSystem::new(&mut world, Entity::Didi, SPEED);
@@ -114,21 +114,21 @@ impl event::EventHandler for GamePlay {
         self.keyboard.press_key(keycode);
 
         let movement = MovementEvent(self.keyboard.arrow_direction());
-        self.world.insert((Event,), iter::once((movement,)));
+        self.world.insert((Event,), once((movement,)));
     }
 
     fn key_up_event(&mut self, _: &mut Context, keycode: KeyCode, _: KeyMods) {
         self.keyboard.release_key(keycode);
 
         let movement = MovementEvent(self.keyboard.arrow_direction());
-        self.world.insert((Event,), iter::once((movement,)));
+        self.world.insert((Event,), once((movement,)));
     }
 
     fn gamepad_axis_event(&mut self, _: &mut Context, axis: Axis, value: f32, _: GamepadId) {
         self.gamepad.move_axis(axis, value);
 
         let movement = MovementEvent(self.gamepad.left_stick);
-        self.world.insert((Event,), iter::once((movement,)));
+        self.world.insert((Event,), once((movement,)));
     }
 
     fn gamepad_button_down_event(&mut self, _: &mut Context, button: Button, _: GamepadId) {

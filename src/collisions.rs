@@ -172,8 +172,8 @@ mod tests {
         );
         let collided_entity = (Position::new(2.0, 0.0), BoxCollider::new(1.0, 1.0));
 
-        world.insert((Id(1),), vec![moving_entity]);
-        world.insert((Id(2),), vec![collided_entity]);
+        world.insert((Id(1),), once(moving_entity));
+        world.insert((Id(2),), once(collided_entity));
 
         update(1.0, &mut world);
 
