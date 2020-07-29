@@ -12,9 +12,9 @@ keywords = ["game"]
 
 [dependencies]
 ggez = "0.5"
-legion = "0.2.4"
-crossbeam-channel = "0.4.2"
+legion = "0.2"
+crossbeam-channel = "0.4"
 ncollide2d = "0.23"
 
 [dev-dependencies]
-rusty-hook = "^0.11.2"
+rusty-hook = "^0.11"
