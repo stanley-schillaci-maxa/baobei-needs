@@ -30,6 +30,10 @@ use ggez::event;
 use ggez::{ContextBuilder, GameResult};
 use std::path::PathBuf;
 
+/// Opens the window and runs the game
+///
+/// # Errors
+/// Will return ggez errors.
 pub fn main() -> GameResult {
     let (ctx, event_loop) = &mut ContextBuilder::new("baobei-needs", "DidiBear")
         .add_resource_path(PathBuf::from("./resources"))
