@@ -19,6 +19,7 @@ pub fn update(dt: f32, world: &mut World) {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::option_unwrap_used, clippy::wildcard_imports)]
     use super::*;
 
     #[test]

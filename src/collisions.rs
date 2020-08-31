@@ -156,6 +156,7 @@ fn isometry_from(pos: Position) -> Isometry2<f32> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::option_unwrap_used, clippy::wildcard_imports)]
     use super::*;
 
     #[test]
