@@ -10,8 +10,12 @@
 )]
 #![allow(clippy::needless_pass_by_value)]
 
-use bevy::prelude::*;
+mod constants;
+mod controllers;
+
 use bevy::{input::system::exit_on_esc_system, prelude::*};
+use constants::SPEED;
+use controllers::{ControllerPlugin, DirectionEvent};
 
 fn main() {
     App::build()
@@ -20,8 +24,10 @@ fn main() {
             ..WindowDescriptor::default()
         })
         .add_plugins(DefaultPlugins)
+        .add_plugin(ControllerPlugin)
         .add_startup_system(setup_entities.system())
         .add_system_to_stage(stage::FIRST, exit_on_esc_system.system())
+        .add_system_to_stage(stage::UPDATE, movement_system.system())
         .run();
 }
 
@@ -57,4 +63,18 @@ fn setup_entities(
             },
             ..SpriteComponents::default()
         });
+}
+
+/// Moves Didi toward the direction sent by controllers.
+fn movement_system(
+    time: Res<Time>,
+    mut direction_event_reader: Local<EventReader<DirectionEvent>>,
+    direction_events: Res<Events<DirectionEvent>>,
+    mut query: Query<(&Didi, &mut Transform)>,
+) {
+    for event in direction_event_reader.iter(&direction_events) {
+        for (_didi, mut transform) in query.iter_mut() {
+            transform.translation += event.direction * time.delta_seconds * SPEED;
+        }
+    }
 }

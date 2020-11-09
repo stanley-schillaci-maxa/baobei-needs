@@ -1,89 +1,96 @@
 //! Manages game controllers such as Keyboard and Gamepad
 
-use ggez::event::{Axis, Button, KeyCode};
-use ncollide2d::nalgebra::Vector2;
-use std::collections::HashSet;
+use bevy::{prelude::*, utils::HashSet};
 
-/// Direction vector between 0 and 1
-pub type Direction = Vector2<f32>;
+/// Plugin managing game controllers such as Keyboard and Gamepad.
+pub struct ControllerPlugin;
 
-/// State of the keyboard
-pub struct Keyboard {
-    /// Set of keys that are being pressed.
-    pressed_keys: HashSet<KeyCode>,
+impl Plugin for ControllerPlugin {
+    fn build(&self, app: &mut AppBuilder) {
+        app.add_event::<DirectionEvent>()
+            .init_resource::<GamepadLobby>()
+            .add_system_to_stage(stage::PRE_EVENT, connection_system.system())
+            .add_system_to_stage(stage::EVENT, keyboard_system.system())
+            .add_system_to_stage(stage::EVENT, gamepad_system.system());
+    }
 }
 
-impl Keyboard {
-    /// Creates a keyboard
-    pub fn new() -> Self {
-        Self {
-            pressed_keys: HashSet::new(),
+/// An event triggered when a controller choose a direction.
+pub struct DirectionEvent {
+    /// Direction vector between 0 and 1
+    pub direction: Vec3,
+}
+
+/// Generates direction events when arrow keys are pressed.
+fn keyboard_system(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut direction_events: ResMut<Events<DirectionEvent>>,
+) {
+    let mut direction = Vec3::zero();
+
+    if keyboard_input.pressed(KeyCode::Up) {
+        direction += Vec3::new(0.0, 1.0, 0.0)
+    }
+    if keyboard_input.pressed(KeyCode::Down) {
+        direction += Vec3::new(0.0, -1.0, 0.0)
+    }
+    if keyboard_input.pressed(KeyCode::Left) {
+        direction += Vec3::new(-1.0, 0.0, 0.0)
+    }
+    if keyboard_input.pressed(KeyCode::Right) {
+        direction += Vec3::new(1.0, 0.0, 0.0)
+    }
+
+    if direction != Vec3::zero() {
+        direction_events.send(DirectionEvent { direction })
+    }
+}
+
+/// Lobby containing connected gamepads.
+#[derive(Default)]
+struct GamepadLobby {
+    /// Connected gamepads
+    gamepads: HashSet<Gamepad>,
+    /// Reader for gamepad events
+    gamepad_event_reader: EventReader<GamepadEvent>,
+}
+
+/// Adds or removes gamepads to/from the lobby when they are connected or disconnected.
+fn connection_system(mut lobby: ResMut<GamepadLobby>, gamepad_event: Res<Events<GamepadEvent>>) {
+    for event in lobby.gamepad_event_reader.iter(&gamepad_event) {
+        match &event {
+            GamepadEvent(gamepad, GamepadEventType::Connected) => {
+                lobby.gamepads.insert(*gamepad);
+                println!("{:?} Connected", gamepad);
+            }
+            GamepadEvent(gamepad, GamepadEventType::Disconnected) => {
+                lobby.gamepads.remove(gamepad);
+                println!("{:?} Disconnected", gamepad);
+            }
+            _ => (),
         }
     }
+}
 
-    /// Presses a key
-    pub fn press_key(&mut self, keycode: KeyCode) {
-        self.pressed_keys.insert(keycode);
-    }
+/// Generates direction events when a gamepad left stick is triggered.
+fn gamepad_system(
+    lobby: Res<GamepadLobby>,
+    axes: Res<Axis<GamepadAxis>>,
+    mut direction_events: ResMut<Events<DirectionEvent>>,
+) {
+    for gamepad in lobby.gamepads.iter().cloned() {
+        let left_stick_x = axes
+            .get(GamepadAxis(gamepad, GamepadAxisType::LeftStickX))
+            .unwrap_or(0.0);
 
-    /// Releases a key
-    pub fn release_key(&mut self, keycode: KeyCode) {
-        self.pressed_keys.remove(&keycode);
-    }
+        let left_stick_y = axes
+            .get(GamepadAxis(gamepad, GamepadAxisType::LeftStickY))
+            .unwrap_or(0.0);
 
-    /// Returns a vector corresponding to the direction indicated by arrow keys.
-    pub fn arrow_direction(&self) -> Direction {
-        self.pressed_keys
-            .iter()
-            .map(|&keycode| match keycode {
-                KeyCode::Up => Direction::new(0.0, -1.0),
-                KeyCode::Down => Direction::new(0.0, 1.0),
-                KeyCode::Left => Direction::new(-1.0, 0.0),
-                KeyCode::Right => Direction::new(1.0, 0.0),
-                _ => Direction::new(0.0, 0.0),
+        if left_stick_x != 0.0 && left_stick_y != 0.0 {
+            direction_events.send(DirectionEvent {
+                direction: Vec3::new(left_stick_x, left_stick_y, 0.0),
             })
-            .sum()
-    }
-}
-
-/// State of the Gamepad
-pub struct Gamepad {
-    /// Set of buttons that are being pressed.
-    pressed_buttons: HashSet<Button>,
-    /// Direction the left stick point to.
-    pub left_stick: Direction,
-    /// Direction the right stick point to.
-    pub right_stick: Direction,
-}
-
-impl Gamepad {
-    /// Creates a keyboard
-    pub fn new() -> Self {
-        Self {
-            pressed_buttons: HashSet::new(),
-            left_stick: Direction::new(0.0, 0.0),
-            right_stick: Direction::new(0.0, 0.0),
-        }
-    }
-
-    /// Presses a button.
-    pub fn press_button(&mut self, button: Button) {
-        self.pressed_buttons.insert(button);
-    }
-
-    /// Releases a button.
-    pub fn release_button(&mut self, button: Button) {
-        self.pressed_buttons.remove(&button);
-    }
-
-    /// Update the stick corresponding to the axis toward the related direction.
-    pub fn move_axis(&mut self, axis: Axis, value: f32) {
-        match axis {
-            Axis::LeftStickX => self.left_stick.x = value,
-            Axis::LeftStickY => self.left_stick.y = -value,
-            Axis::RightStickX => self.right_stick.x = value,
-            Axis::RightStickY => self.right_stick.y = -value,
-            _ => {}
         }
     }
 }
