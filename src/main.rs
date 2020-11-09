@@ -8,13 +8,6 @@
     clippy::cargo,
     clippy::restriction
 )]
-#![allow(
-    clippy::multiple_crate_versions, // caused by ggez
-    clippy::implicit_return,
-    clippy::float_arithmetic,
-    clippy::wildcard_enum_match_arm,
-    clippy::module_name_repetitions,
-)]
 
 mod collisions;
 mod constants;
