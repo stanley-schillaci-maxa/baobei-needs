@@ -6,33 +6,16 @@
     clippy::pedantic,
     clippy::nursery,
     clippy::cargo,
-    clippy::restriction
+    clippy::missing_docs_in_private_items
 )]
 
-mod collisions;
-mod constants;
-mod controllers;
-mod events;
-mod game_play;
-mod movement;
-mod physics;
-mod rendering;
+use bevy::prelude::*;
 
-use game_play::GamePlay;
-use ggez::event;
-use ggez::{ContextBuilder, GameResult};
-use std::path::PathBuf;
+pub fn main() {
+    App::build().add_system(hello_world_system.system()).run();
+}
 
-/// Opens the window and runs the game
-///
-/// # Errors
-/// Will return ggez errors.
-pub fn main() -> GameResult {
-    let (ctx, event_loop) = &mut ContextBuilder::new("baobei-needs", "DidiBear")
-        .add_resource_path(PathBuf::from("./resources"))
-        .build()?;
-
-    let state = &mut GamePlay::new(ctx)?;
-
-    event::run(ctx, event_loop, state)
+/// Temporary system
+fn hello_world_system() {
+    println!("hello world");
 }
