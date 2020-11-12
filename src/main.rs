@@ -63,14 +63,14 @@ fn setup_entities(
 
     commands
         .spawn(Camera2dComponents::default())
-        .spawn((Didi, BoxCollider(size)))
+        .spawn((Didi, BoxCollider { size }))
         .with_bundle(SpriteComponents {
             material: materials.add(didi_texture_handle.into()),
             transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
             ..SpriteComponents::default()
         })
         .with_children(add_box_collider_sprite)
-        .spawn((Baobei, BoxCollider(size)))
+        .spawn((Baobei, BoxCollider { size }))
         .with_bundle(SpriteComponents {
             material: materials.add(baobei_texture_handle.into()),
             transform: Transform {

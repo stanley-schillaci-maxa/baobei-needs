@@ -19,8 +19,11 @@ impl Plugin for CollisionPlugin {
     }
 }
 
-/// Rectangle collider, ie. the width and height.
-pub struct BoxCollider(pub Vec2);
+/// 2D Collider in a shape of a rectangle
+pub struct BoxCollider {
+    /// The width and height of the box.
+    pub size: Vec2,
+}
 
 /// Represents a contact between two entities
 #[derive(Clone, Copy, Debug, Eq)]
@@ -54,7 +57,6 @@ pub enum ContactEvent {
     /// A contact is finished.
     Stopped(Contact),
 }
-use itertools::Itertools;
 
 /// Compare positions of box colliders and emit contact events.
 pub fn collision_system(
@@ -63,6 +65,8 @@ pub fn collision_system(
     query: Query<(Entity, &Transform, &BoxCollider)>,
     contacts: Query<(&Contact, Entity)>,
 ) {
+    use itertools::Itertools;
+
     let next_contacts: HashSet<_> = query
         .iter()
         .combinations_with_replacement(2)
@@ -71,10 +75,10 @@ pub fn collision_system(
             let (entity_b, transform_b, collider_b) = pair[1];
 
             let pos_a = transform_a.translation;
-            let size_a = transform_a.scale.truncate() * collider_a.0;
+            let size_a = transform_a.scale.truncate() * collider_a.size;
 
             let pos_b = transform_b.translation;
-            let size_b = transform_b.scale.truncate() * collider_b.0;
+            let size_b = transform_b.scale.truncate() * collider_b.size;
 
             collide(pos_a, size_a, pos_b, size_b).map(|_| Contact(entity_a, entity_b))
         })
@@ -85,6 +89,7 @@ pub fn collision_system(
 
     for &started_contact in next_contacts.difference(&prev_contacts) {
         dbg!(started_contact);
+
         contact_events.send(ContactEvent::Started(started_contact));
         commands.spawn((started_contact,));
     }
