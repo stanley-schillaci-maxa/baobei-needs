@@ -1,5 +1,5 @@
 [hooks]
-pre-commit = "cargo fmt -- --check ; cargo fmt ; touch src/main.rs ; cargo clippy"
+pre-commit = "cargo fmt -- --check ; cargo fmt ; cargo fix ; cargo clippy"
 
 [logging]
 verbose = true
