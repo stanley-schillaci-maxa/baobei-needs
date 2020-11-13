@@ -19,6 +19,11 @@ impl Plugin for CollisionPlugin {
     }
 }
 
+/// Position
+#[derive(Clone, Copy, Debug)]
+pub struct Position(pub Vec3);
+
+#[derive(Debug)]
 /// 2D Collider in a shape of a rectangle
 pub struct BoxCollider {
     /// The width and height of the box.
@@ -62,7 +67,7 @@ pub enum ContactEvent {
 pub fn collision_system(
     mut commands: Commands,
     mut contact_events: ResMut<Events<ContactEvent>>,
-    query: Query<(Entity, &Transform, &BoxCollider)>,
+    query: Query<(Entity, &Position, &BoxCollider)>,
     contacts: Query<(&Contact, Entity)>,
 ) {
     use itertools::Itertools;
@@ -71,16 +76,13 @@ pub fn collision_system(
         .iter()
         .combinations_with_replacement(2)
         .filter_map(|pair| {
-            let (entity_a, transform_a, collider_a) = pair[0];
-            let (entity_b, transform_b, collider_b) = pair[1];
+            let (entity_a, pos_a, collider_a) = pair[0];
+            let (entity_b, pos_b, collider_b) = pair[1];
 
-            let pos_a = transform_a.translation;
-            let size_a = transform_a.scale.truncate() * collider_a.size;
+            let size_a = collider_a.size;
+            let size_b = collider_b.size;
 
-            let pos_b = transform_b.translation;
-            let size_b = transform_b.scale.truncate() * collider_b.size;
-
-            collide(pos_a, size_a, pos_b, size_b).map(|_| Contact(entity_a, entity_b))
+            collide(pos_a.0, size_a, pos_b.0, size_b).map(|_| Contact(entity_a, entity_b))
         })
         .collect();
 
