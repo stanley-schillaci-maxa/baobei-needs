@@ -15,15 +15,17 @@ pub struct CollisionPlugin;
 impl Plugin for CollisionPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_event::<ContactEvent>()
+            .register_component::<Position>()
+            .register_component::<BoxCollider>()
             .add_system_to_stage(stage::EVENT, collision_system.system());
     }
 }
 
 /// Position
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default, Properties)]
 pub struct Position(pub Vec3);
 
-#[derive(Debug)]
+#[derive(Debug, Default, Properties)]
 /// 2D Collider in a shape of a rectangle
 pub struct BoxCollider {
     /// The width and height of the box.

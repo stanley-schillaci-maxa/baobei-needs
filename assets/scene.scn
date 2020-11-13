@@ -1,0 +1,36 @@
+[
+  (
+    entity: 0,
+    components: [
+      { "type": "Didi", "map": {} },
+      {
+        "type": "SpriteLoader",
+        "map": { 
+          "path": "didi.png",
+          "scale": {
+            "type": "Vec3", 
+            "value": (0.3, 0.3, 0.0),
+          },
+        },
+      },
+      {
+        "type": "Position",
+        "map": {
+          "0": {
+            "type": "Vec3", 
+            "value": (640.0, 260.0, 0.0),
+          },
+        }
+      },
+      {
+        "type": "BoxCollider",
+        "map": {
+          "size": {
+            "type": "Vec2", 
+            "value": (100.0, 100.0),
+          },
+        }
+      },
+    ]
+  )
+]

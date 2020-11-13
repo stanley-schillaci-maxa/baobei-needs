@@ -1,4 +1,4 @@
-//! A little game
+//! A little game made with Bevy.
 
 // Clippy configuration
 #![deny(
@@ -13,12 +13,14 @@
 mod collisions;
 mod constants;
 mod controllers;
+mod scenes;
 
 use bevy::{input::system::exit_on_esc_system, prelude::*};
 
 use collisions::{BoxCollider, CollisionPlugin, Position};
 use constants::{SPEED, WINDOW_HEIGHT, WINDOW_WIDTH};
 use controllers::{ControllerPlugin, DirectionEvent};
+use scenes::SceneLoaderPlugin;
 
 fn main() {
     App::build()
@@ -29,8 +31,10 @@ fn main() {
             ..WindowDescriptor::default()
         })
         .add_plugins(DefaultPlugins)
+        .register_component::<Didi>()
         .add_plugin(ControllerPlugin)
         .add_plugin(CollisionPlugin)
+        .add_plugin(SceneLoaderPlugin)
         .add_startup_system(setup_entities.system())
         .add_system_to_stage(stage::FIRST, exit_on_esc_system.system())
         .add_system_to_stage(stage::UPDATE, movement_system.system())
@@ -39,6 +43,7 @@ fn main() {
 }
 
 /// The player
+#[derive(Properties, Default)]
 struct Didi;
 /// The baobei to take care of
 struct Baobei;
@@ -137,18 +142,6 @@ fn setup_entities(
             ..SpriteComponents::default()
         })
         .spawn((Baobei, baobei_position))
-        .with_bundle(box_collider_sprite(size));
-
-    let didi_position = Position((640.00, 260.0, 0.0).into());
-
-    commands
-        .spawn((Didi, didi_position, BoxCollider { size }))
-        .with_bundle(SpriteComponents {
-            material: materials.add(asset_server.load("didi.png").into()),
-            transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
-            ..SpriteComponents::default()
-        })
-        .spawn((Didi, didi_position))
         .with_bundle(box_collider_sprite(size));
 }
 
