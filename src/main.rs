@@ -51,8 +51,6 @@ fn setup_entities(
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    let size = Vec2::new(100.0, 20.0);
-
     let color_handle = materials.add(Color::rgba(0.3, 1.0, 0.3, 0.3).into());
 
     let box_collider_sprite = |size: Vec2| SpriteComponents {
@@ -66,29 +64,6 @@ fn setup_entities(
         Vec3::new(WINDOW_WIDTH as f32 / 2.0, WINDOW_HEIGHT as f32 / 2.0, 0.0);
 
     commands.spawn(camera_2d);
-
-    let didi_position = Position((640.00, 260.0, 0.0).into());
-
-    commands
-        .spawn((Didi, didi_position, BoxCollider { size }))
-        .with_bundle(SpriteComponents {
-            material: materials.add(asset_server.load("didi.png").into()),
-            transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
-            ..SpriteComponents::default()
-        })
-        .spawn((Didi, didi_position))
-        .with_bundle(box_collider_sprite(size));
-
-    let baobei_position = Position((1100.00, 200.0, 0.0).into());
-    commands
-        .spawn((Baobei, baobei_position, BoxCollider { size }))
-        .with_bundle(SpriteComponents {
-            material: materials.add(asset_server.load("baobei.png").into()),
-            transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
-            ..SpriteComponents::default()
-        })
-        .spawn((Baobei, baobei_position))
-        .with_bundle(box_collider_sprite(size));
 
     let couch_position = Position((1000.0, 150.0, 0.0).into());
     let couch_size = Vec2::new(100.0, 100.0);
@@ -136,6 +111,32 @@ fn setup_entities(
         })
         .spawn((Furniture, kitchen_position))
         .with_bundle(box_collider_sprite(kitchen_size));
+
+    let size = Vec2::new(100.0, 20.0);
+
+    let baobei_position = Position((1100.00, 200.0, 0.0).into());
+
+    commands
+        .spawn((Baobei, baobei_position, BoxCollider { size }))
+        .with_bundle(SpriteComponents {
+            material: materials.add(asset_server.load("baobei.png").into()),
+            transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
+            ..SpriteComponents::default()
+        })
+        .spawn((Baobei, baobei_position))
+        .with_bundle(box_collider_sprite(size));
+
+    let didi_position = Position((640.00, 260.0, 0.0).into());
+
+    commands
+        .spawn((Didi, didi_position, BoxCollider { size }))
+        .with_bundle(SpriteComponents {
+            material: materials.add(asset_server.load("didi.png").into()),
+            transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
+            ..SpriteComponents::default()
+        })
+        .spawn((Didi, didi_position))
+        .with_bundle(box_collider_sprite(size));
 }
 
 /// Moves Didi toward the direction sent by controllers.
