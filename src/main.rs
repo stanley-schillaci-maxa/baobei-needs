@@ -112,9 +112,22 @@ fn setup_entities(
         .spawn((Furniture, kitchen_position))
         .with_bundle(box_collider_sprite(kitchen_size));
 
+    let sink_position = Position((1050.0, 450.0, 0.0).into());
+    let sink_size = Vec2::new(100.0, 100.0);
+
+    commands
+        .spawn((Furniture, sink_position, BoxCollider { size: sink_size }))
+        .with_bundle(SpriteComponents {
+            material: materials.add(asset_server.load("sink.png").into()),
+            transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
+            ..SpriteComponents::default()
+        })
+        .spawn((Furniture, sink_position))
+        .with_bundle(box_collider_sprite(sink_size));
+
     let size = Vec2::new(100.0, 20.0);
 
-    let baobei_position = Position((1100.00, 200.0, 0.0).into());
+    let baobei_position = Position((1050.00, 250.0, 0.0).into());
 
     commands
         .spawn((Baobei, baobei_position, BoxCollider { size }))
