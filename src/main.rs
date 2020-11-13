@@ -17,13 +17,15 @@ mod controllers;
 use bevy::{input::system::exit_on_esc_system, prelude::*};
 
 use collisions::{BoxCollider, CollisionPlugin, Position};
-use constants::SPEED;
+use constants::{SPEED, WINDOW_HEIGHT, WINDOW_WIDTH};
 use controllers::{ControllerPlugin, DirectionEvent};
 
 fn main() {
     App::build()
         .add_resource(WindowDescriptor {
             title: "Baobei needs".to_string(),
+            width: WINDOW_WIDTH,
+            height: WINDOW_HEIGHT,
             ..WindowDescriptor::default()
         })
         .add_plugins(DefaultPlugins)
