@@ -8,7 +8,7 @@
     clippy::cargo,
     clippy::clippy::missing_docs_in_private_items
 )]
-#![allow(clippy::needless_pass_by_value)]
+#![allow(clippy::needless_pass_by_value, clippy::clippy::cast_precision_loss)]
 
 mod collisions;
 mod constants;
@@ -67,6 +67,8 @@ fn setup_entities(
 
     commands.spawn(camera_2d);
 
+    let didi_position = Position((640.00, 260.0, 0.0).into());
+
     commands
         .spawn((Didi, didi_position, BoxCollider { size }))
         .with_bundle(SpriteComponents {
@@ -77,7 +79,7 @@ fn setup_entities(
         .spawn((Didi, didi_position))
         .with_bundle(box_collider_sprite(size));
 
-    let baobei_position = Position((200.0, -200.0, 0.0).into());
+    let baobei_position = Position((1100.00, 200.0, 0.0).into());
     commands
         .spawn((Baobei, baobei_position, BoxCollider { size }))
         .with_bundle(SpriteComponents {
@@ -88,20 +90,20 @@ fn setup_entities(
         .spawn((Baobei, baobei_position))
         .with_bundle(box_collider_sprite(size));
 
-    let couch_position = Position((0.0, 0.0, 0.0).into());
+    let couch_position = Position((1000.0, 150.0, 0.0).into());
     let couch_size = Vec2::new(100.0, 100.0);
 
     commands
         .spawn((Furniture, couch_position, BoxCollider { size: couch_size }))
         .with_bundle(SpriteComponents {
             material: materials.add(asset_server.load("couch.png").into()),
-            transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
+            transform: Transform::from_scale(Vec3::new(0.4, 0.4, 0.0)),
             ..SpriteComponents::default()
         })
         .spawn((Furniture, couch_position))
         .with_bundle(box_collider_sprite(couch_size));
 
-    let fridge_position = Position((0.0, 0.0, 0.0).into());
+    let fridge_position = Position((720.0, 540.0, 0.0).into());
     let fridge_size = Vec2::new(100.0, 100.0);
 
     commands
@@ -112,13 +114,13 @@ fn setup_entities(
         ))
         .with_bundle(SpriteComponents {
             material: materials.add(asset_server.load("fridge.png").into()),
-            transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
+            transform: Transform::from_scale(Vec3::new(0.35, 0.35, 0.0)),
             ..SpriteComponents::default()
         })
         .spawn((Furniture, fridge_position))
         .with_bundle(box_collider_sprite(fridge_size));
 
-    let kitchen_position = Position((0.0, 0.0, 0.0).into());
+    let kitchen_position = Position((300.0, 540.0, 0.0).into());
     let kitchen_size = Vec2::new(100.0, 100.0);
 
     commands
@@ -129,7 +131,7 @@ fn setup_entities(
         ))
         .with_bundle(SpriteComponents {
             material: materials.add(asset_server.load("kitchen.png").into()),
-            transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
+            transform: Transform::from_scale(Vec3::new(0.5, 0.5, 0.0)),
             ..SpriteComponents::default()
         })
         .spawn((Furniture, kitchen_position))
