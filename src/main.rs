@@ -61,9 +61,11 @@ fn setup_entities(
         ..SpriteComponents::default()
     };
 
-    commands.spawn(Camera2dComponents::default());
+    let mut camera_2d = Camera2dComponents::default();
+    camera_2d.transform.translation +=
+        Vec3::new(WINDOW_WIDTH as f32 / 2.0, WINDOW_HEIGHT as f32 / 2.0, 0.0);
 
-    let didi_position = Position((-00.0, 200.0, 0.0).into());
+    commands.spawn(camera_2d);
 
     commands
         .spawn((Didi, didi_position, BoxCollider { size }))
