@@ -40,8 +40,10 @@ fn main() {
 
 /// The player
 struct Didi;
-/// The baobei to take care of.
+/// The baobei to take care of
 struct Baobei;
+/// Furniture containing items
+struct Furniture;
 
 /// Spawn the camera, Didi and Baobei.
 fn setup_entities(
@@ -49,14 +51,11 @@ fn setup_entities(
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    let didi_texture_handle = asset_server.load("didi.png");
-    let baobei_texture_handle = asset_server.load("baobei.png");
-
     let size = Vec2::new(100.0, 20.0);
 
-    let color_handle = materials.add(Color::rgb(0.3, 1.0, 0.3).into());
+    let color_handle = materials.add(Color::rgba(0.3, 1.0, 0.3, 0.3).into());
 
-    let box_collider_sprite = || SpriteComponents {
+    let box_collider_sprite = |size: Vec2| SpriteComponents {
         material: color_handle.clone(),
         sprite: Sprite::new(size),
         ..SpriteComponents::default()
@@ -65,27 +64,74 @@ fn setup_entities(
     commands.spawn(Camera2dComponents::default());
 
     let didi_position = Position((-00.0, 200.0, 0.0).into());
-    let baobei_position = Position((200.0, -200.0, 0.0).into());
 
     commands
         .spawn((Didi, didi_position, BoxCollider { size }))
         .with_bundle(SpriteComponents {
-            material: materials.add(didi_texture_handle.into()),
+            material: materials.add(asset_server.load("didi.png").into()),
             transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
             ..SpriteComponents::default()
         })
         .spawn((Didi, didi_position))
-        .with_bundle(box_collider_sprite());
+        .with_bundle(box_collider_sprite(size));
 
+    let baobei_position = Position((200.0, -200.0, 0.0).into());
     commands
         .spawn((Baobei, baobei_position, BoxCollider { size }))
         .with_bundle(SpriteComponents {
-            material: materials.add(baobei_texture_handle.into()),
+            material: materials.add(asset_server.load("baobei.png").into()),
             transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
             ..SpriteComponents::default()
         })
         .spawn((Baobei, baobei_position))
-        .with_bundle(box_collider_sprite());
+        .with_bundle(box_collider_sprite(size));
+
+    let couch_position = Position((0.0, 0.0, 0.0).into());
+    let couch_size = Vec2::new(100.0, 100.0);
+
+    commands
+        .spawn((Furniture, couch_position, BoxCollider { size: couch_size }))
+        .with_bundle(SpriteComponents {
+            material: materials.add(asset_server.load("couch.png").into()),
+            transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
+            ..SpriteComponents::default()
+        })
+        .spawn((Furniture, couch_position))
+        .with_bundle(box_collider_sprite(couch_size));
+
+    let fridge_position = Position((0.0, 0.0, 0.0).into());
+    let fridge_size = Vec2::new(100.0, 100.0);
+
+    commands
+        .spawn((
+            Furniture,
+            fridge_position,
+            BoxCollider { size: fridge_size },
+        ))
+        .with_bundle(SpriteComponents {
+            material: materials.add(asset_server.load("fridge.png").into()),
+            transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
+            ..SpriteComponents::default()
+        })
+        .spawn((Furniture, fridge_position))
+        .with_bundle(box_collider_sprite(fridge_size));
+
+    let kitchen_position = Position((0.0, 0.0, 0.0).into());
+    let kitchen_size = Vec2::new(100.0, 100.0);
+
+    commands
+        .spawn((
+            Furniture,
+            kitchen_position,
+            BoxCollider { size: kitchen_size },
+        ))
+        .with_bundle(SpriteComponents {
+            material: materials.add(asset_server.load("kitchen.png").into()),
+            transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
+            ..SpriteComponents::default()
+        })
+        .spawn((Furniture, kitchen_position))
+        .with_bundle(box_collider_sprite(kitchen_size));
 }
 
 /// Moves Didi toward the direction sent by controllers.
