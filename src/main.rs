@@ -39,7 +39,7 @@ fn main() {
         .add_plugin(SceneLoaderPlugin)
         .add_startup_system(setup_camera.system())
         .add_system_to_stage(stage::FIRST, exit_on_esc_system.system())
-        .add_system_to_stage(stage::UPDATE, movement_system.system())
+        .add_system_to_stage(stage::PRE_UPDATE, movement_system.system())
         .add_system_to_stage(stage::POST_UPDATE, drawing_system.system())
         .run();
 }

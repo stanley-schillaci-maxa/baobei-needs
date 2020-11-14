@@ -17,7 +17,10 @@ impl Plugin for CollisionPlugin {
         app.add_event::<ContactEvent>()
             .register_component::<Position>()
             .register_component::<BoxCollider>()
-            .add_system_to_stage(stage::EVENT, collision_system.system());
+            .init_resource::<ColliderViewers>()
+            .add_system_to_stage(stage::EVENT, collision_system.system())
+            .add_system_to_stage(stage::PRE_UPDATE, add_collider_viewer_system.system())
+            .add_system_to_stage(stage::POST_UPDATE, update_collider_viewers_system.system());
     }
 }
 
@@ -104,6 +107,54 @@ pub fn collision_system(
         contact_events.send(ContactEvent::Stopped(*stopped_contact));
         if let Some(&entity) = prev_entities.get(stopped_contact) {
             commands.despawn(entity);
+        }
+    }
+}
+
+/// Component tagging an entity as a collider viewer
+struct ColliderViewer;
+
+/// Lobby containing connected gamepads.
+#[derive(Default)]
+struct ColliderViewers(HashMap<Entity, Entity>);
+
+/// Adds to entities with a `SpritLoader` the related `SpriteComponents`.
+fn add_collider_viewer_system(
+    mut commands: Commands,
+    mut viewers: ResMut<ColliderViewers>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    query: Query<(Entity, Changed<BoxCollider>, &Position)>,
+) {
+    for (entity, box_collider, pos) in query.iter() {
+        let color_handle = materials.add(Color::rgba(0.3, 1.0, 0.3, 0.3).into());
+
+        viewers.0.entry(entity).or_insert_with(|| {
+            commands
+                .spawn((ColliderViewer, Position(pos.0)))
+                .with_bundle(SpriteComponents {
+                    material: color_handle,
+                    sprite: Sprite::new(box_collider.size),
+                    ..SpriteComponents::default()
+                })
+                .current_entity()
+                .unwrap()
+        });
+    }
+}
+
+/// Adds to entities with a `SpritLoader` the related `SpriteComponents`.
+fn update_collider_viewers_system(
+    viewers: Res<ColliderViewers>,
+    query: Query<(Entity, &BoxCollider, Changed<Position>)>,
+    mut viewer_query: Query<(&ColliderViewer, Mut<Position>)>,
+) {
+    for (entity, _, pos) in query.iter() {
+        if let Some((_, mut viewer_pos)) = viewers
+            .0
+            .get(&entity)
+            .and_then(|&viewer| viewer_query.get_mut(viewer).ok())
+        {
+            viewer_pos.0 = pos.0
         }
     }
 }
