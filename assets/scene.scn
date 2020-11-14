@@ -2,6 +2,178 @@
   (
     entity: 0,
     components: [
+      { "type": "Furniture", "map": {} },
+      {
+        "type": "SpriteLoader",
+        "map": { 
+          "path": "sink.png",
+          "scale": {
+            "type": "Vec3", 
+            "value": (0.3, 0.3, 0.0),
+          },
+        },
+      },
+      {
+        "type": "Position",
+        "map": {
+          "0": {
+            "type": "Vec3", 
+            "value": (1050.0, 480.0, 0.0),
+          },
+        }
+      },
+      {
+        "type": "BoxCollider",
+        "map": {
+          "size": {
+            "type": "Vec2", 
+            "value": (100.0, 100.0),
+          },
+        }
+      },
+    ]
+  ),
+  (
+    entity: 1,
+    components: [
+      { "type": "Furniture", "map": {} },
+      {
+        "type": "SpriteLoader",
+        "map": { 
+          "path": "kitchen.png",
+          "scale": {
+            "type": "Vec3", 
+            "value": (0.5, 0.5, 0.0),
+          },
+        },
+      },
+      {
+        "type": "Position",
+        "map": {
+          "0": {
+            "type": "Vec3", 
+            "value": (300.0, 540.0, 0.0),
+          },
+        }
+      },
+      {
+        "type": "BoxCollider",
+        "map": {
+          "size": {
+            "type": "Vec2", 
+            "value": (100.0, 100.0),
+          },
+        }
+      },
+    ]
+  ),
+  (
+    entity: 2,
+    components: [
+      { "type": "Furniture", "map": {} },
+      {
+        "type": "SpriteLoader",
+        "map": { 
+          "path": "fridge.png",
+          "scale": {
+            "type": "Vec3", 
+            "value": (0.35, 0.35, 0.0),
+          },
+        },
+      },
+      {
+        "type": "Position",
+        "map": {
+          "0": {
+            "type": "Vec3", 
+            "value": (720.0, 540.0, 0.0),
+          },
+        }
+      },
+      {
+        "type": "BoxCollider",
+        "map": {
+          "size": {
+            "type": "Vec2", 
+            "value": (100.0, 100.0),
+          },
+        }
+      },
+    ]
+  ),
+
+  (
+    entity: 3,
+    components: [
+      { "type": "Furniture", "map": {} },
+      {
+        "type": "SpriteLoader",
+        "map": { 
+          "path": "couch.png",
+          "scale": {
+            "type": "Vec3", 
+            "value": (0.4, 0.4, 0.0),
+          },
+        },
+      },
+      {
+        "type": "Position",
+        "map": {
+          "0": {
+            "type": "Vec3", 
+            "value": (1000.0, 150.0, 0.0),
+          },
+        }
+      },
+      {
+        "type": "BoxCollider",
+        "map": {
+          "size": {
+            "type": "Vec2", 
+            "value": (100.0, 100.0),
+          },
+        }
+      },
+    ]
+  ),
+
+  (
+    entity: 4,
+    components: [
+      { "type": "Baobei", "map": {} },
+      {
+        "type": "SpriteLoader",
+        "map": { 
+          "path": "baobei.png",
+          "scale": {
+            "type": "Vec3", 
+            "value": (0.3, 0.3, 0.0),
+          },
+        },
+      },
+      {
+        "type": "Position",
+        "map": {
+          "0": {
+            "type": "Vec3", 
+            "value": (1050.0, 235.0, 0.0),
+          },
+        }
+      },
+      {
+        "type": "BoxCollider",
+        "map": {
+          "size": {
+            "type": "Vec2", 
+            "value": (100.0, 100.0),
+          },
+        }
+      },
+    ]
+  ),
+  (
+    entity: 5,
+    components: [
       { "type": "Didi", "map": {} },
       {
         "type": "SpriteLoader",
