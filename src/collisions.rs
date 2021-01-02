@@ -7,7 +7,9 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-use bevy::{math::Vec2, prelude::*, sprite::collide_aabb::collide};
+use bevy::{prelude::*, sprite::collide_aabb::collide};
+
+use crate::constants::{GameState, STAGE};
 
 /// Plugin managing contact collisions
 pub struct CollisionPlugin;
@@ -15,20 +17,30 @@ pub struct CollisionPlugin;
 impl Plugin for CollisionPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_event::<ContactEvent>()
-            .register_component::<Position>()
-            .register_component::<BoxCollider>()
+            .register_type::<Position>()
+            .register_type::<BoxCollider>()
             .init_resource::<ColliderViewers>()
-            .add_system_to_stage(stage::EVENT, collision_system.system())
-            .add_system_to_stage(stage::PRE_UPDATE, add_collider_viewer_system.system())
-            .add_system_to_stage(stage::POST_UPDATE, update_collider_viewers_system.system());
+            .on_state_update(STAGE, GameState::InGame, collision_system.system())
+            .on_state_update(
+                STAGE,
+                GameState::InGame,
+                add_collider_viewer_system.system(),
+            )
+            .on_state_update(
+                STAGE,
+                GameState::InGame,
+                update_collider_viewers_system.system(),
+            );
     }
 }
 
 /// Position
-#[derive(Clone, Copy, Debug, Default, Properties)]
+#[derive(Clone, Copy, Debug, Default, Reflect)]
+#[reflect(Component)]
 pub struct Position(pub Vec3);
 
-#[derive(Debug, Default, Properties)]
+#[derive(Debug, Default, Reflect)]
+#[reflect(Component)]
 /// 2D Collider in a shape of a rectangle
 pub struct BoxCollider {
     /// The width and height of the box.
@@ -70,7 +82,7 @@ pub enum ContactEvent {
 
 /// Compare positions of box colliders and emit contact events.
 pub fn collision_system(
-    mut commands: Commands,
+    commands: &mut Commands,
     mut contact_events: ResMut<Events<ContactEvent>>,
     query: Query<(Entity, &Position, &BoxCollider)>,
     contacts: Query<(&Contact, Entity)>,
@@ -118,23 +130,26 @@ struct ColliderViewer;
 #[derive(Default)]
 struct ColliderViewers(HashMap<Entity, Entity>);
 
-/// Adds to entities with a `SpritLoader` the related `SpriteComponents`.
+/// Adds to entities with a `SpritLoader` the related `SpriteBundle`.
 fn add_collider_viewer_system(
-    mut commands: Commands,
+    commands: &mut Commands,
     mut viewers: ResMut<ColliderViewers>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    query: Query<(Entity, Changed<BoxCollider>, &Position)>,
+    query: Query<(Entity, &BoxCollider, &Position), Changed<BoxCollider>>,
 ) {
     for (entity, box_collider, pos) in query.iter() {
         let color_handle = materials.add(Color::rgba(0.3, 1.0, 0.3, 0.3).into());
 
         viewers.0.entry(entity).or_insert_with(|| {
+            let mut viewer_pos = Position(pos.0);
+            viewer_pos.0.y = pos.0.y - 1.0; // Move the collision viewer forward
+
             commands
-                .spawn((ColliderViewer, Position(pos.0)))
-                .with_bundle(SpriteComponents {
+                .spawn((ColliderViewer, viewer_pos))
+                .with_bundle(SpriteBundle {
                     material: color_handle,
                     sprite: Sprite::new(box_collider.size),
-                    ..SpriteComponents::default()
+                    ..SpriteBundle::default()
                 })
                 .current_entity()
                 .unwrap()
@@ -142,11 +157,11 @@ fn add_collider_viewer_system(
     }
 }
 
-/// Adds to entities with a `SpritLoader` the related `SpriteComponents`.
+/// Adds to entities with a `SpritLoader` the related `SpriteBundle`.
 fn update_collider_viewers_system(
     viewers: Res<ColliderViewers>,
-    query: Query<(Entity, &BoxCollider, Changed<Position>)>,
-    mut viewer_query: Query<(&ColliderViewer, Mut<Position>)>,
+    query: Query<(Entity, &BoxCollider, &Position), Changed<Position>>,
+    mut viewer_query: Query<(&ColliderViewer, &mut Position)>,
 ) {
     for (entity, _, pos) in query.iter() {
         if let Some((_, mut viewer_pos)) = viewers
@@ -154,7 +169,8 @@ fn update_collider_viewers_system(
             .get(&entity)
             .and_then(|&viewer| viewer_query.get_mut(viewer).ok())
         {
-            viewer_pos.0 = pos.0
+            viewer_pos.0 = pos.0;
+            viewer_pos.0.y = pos.0.y - 1.0; // Move the collision viewer forward
         }
     }
 }
