@@ -47,6 +47,15 @@ pub struct BoxCollider {
     pub size: Vec2,
 }
 
+impl BoxCollider {
+    /// Creates a box collider with the given size.
+    pub fn new(x: f32, y: f32) -> Self {
+        Self {
+            size: Vec2::new(x, y),
+        }
+    }
+}
+
 /// Represents a contact between two entities
 #[derive(Clone, Copy, Debug, Eq)]
 pub struct Contact(Entity, Entity);

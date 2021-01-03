@@ -5,7 +5,7 @@ use bevy::{
 };
 
 use crate::{
-    collisions::Position,
+    collisions::{BoxCollider, Position},
     constants::{GameState, SPEED, WINDOW_HEIGHT, WINDOW_WIDTH},
 };
 use crate::{constants::STAGE, controllers::DirectionEvent};
@@ -15,10 +15,12 @@ pub struct GameplayPlugin;
 
 impl Plugin for GameplayPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.register_type::<Didi>()
+        app.init_resource::<GameplayMaterials>()
+            .register_type::<Didi>()
             .register_type::<Furniture>()
             .register_type::<Baobei>()
-            .on_state_enter(STAGE, GameState::InGame, setup_camera.system())
+            .add_startup_system(setup_camera.system())
+            .add_startup_system(spawn_didi.system())
             .on_state_update(STAGE, GameState::InGame, back_to_menu_system.system())
             .on_state_update(STAGE, GameState::InGame, movement_system.system())
             .on_state_update(STAGE, GameState::InGame, drawing_system.system());
@@ -38,12 +40,42 @@ struct Baobei;
 #[reflect(Component)]
 struct Furniture;
 
+/// Sprites and colors in the gameplay phase.
+struct GameplayMaterials {
+    /// Transparent color
+    didi_sprite: Handle<ColorMaterial>,
+}
+
+impl FromResources for GameplayMaterials {
+    fn from_resources(resources: &Resources) -> Self {
+        let mut materials = resources.get_mut::<Assets<ColorMaterial>>().unwrap();
+        let asset_server = resources.get_mut::<AssetServer>().unwrap();
+        Self {
+            didi_sprite: materials.add(asset_server.load("didi.png").into()),
+        }
+    }
+}
+
 /// Spawn the camera.
 fn setup_camera(commands: &mut Commands) {
     let mut camera_2d = Camera2dBundle::default();
     camera_2d.transform.translation += Vec3::new(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT / 2.0, 0.0);
 
     commands.spawn(camera_2d);
+}
+
+
+/// Spawn the entity for Didi, the player.
+fn spawn_didi(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+    commands
+        .spawn(SpriteBundle {
+            material: materials.didi_sprite.clone(),
+            transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
+            ..SpriteBundle::default()
+        })
+        .with(Didi)
+        .with(Position(Vec3::new(640.0, 260.0, 0.0)))
+        .with(BoxCollider::new(100.0, 100.0));
 }
 
 /// Moves Didi toward the direction sent by controllers.
