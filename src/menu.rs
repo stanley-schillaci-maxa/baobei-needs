@@ -8,7 +8,7 @@ pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.init_resource::<ButtonMaterials>()
+        app.init_resource::<MenuMaterials>()
             .on_state_enter(STAGE, GameState::Menu, setup_menu.system())
             .on_state_update(STAGE, GameState::Menu, button_system.system())
             .on_state_update(STAGE, GameState::Menu, exit_on_esc_system.system())
@@ -16,28 +16,29 @@ impl Plugin for MenuPlugin {
     }
 }
 
-/// Entities in the menu phase
+/// Stores entities in the menu phase
 struct MenuData {
-    /// Entity of the main title
-    title: Entity,
-    /// Entity of the `Play` button
-    button: Entity,
+    /// Entity wrapping all menu entities (title, buttons)
+    entity_wrapper: Entity,
 }
 
 /// Colors of the button.
-struct ButtonMaterials {
-    /// Default style
-    normal: Handle<ColorMaterial>,
-    /// Hover style
-    hovered: Handle<ColorMaterial>,
+struct MenuMaterials {
+    /// Transparent color
+    none: Handle<ColorMaterial>,
+    /// Default style of a button
+    normal_button: Handle<ColorMaterial>,
+    /// Hovered style of a button
+    hovered_button: Handle<ColorMaterial>,
 }
 
-impl FromResources for ButtonMaterials {
+impl FromResources for MenuMaterials {
     fn from_resources(resources: &Resources) -> Self {
         let mut materials = resources.get_mut::<Assets<ColorMaterial>>().unwrap();
         Self {
-            normal: materials.add(Color::rgb(0.15, 0.15, 0.15).into()),
-            hovered: materials.add(Color::rgb(0.25, 0.25, 0.25).into()),
+            none: materials.add(Color::NONE.into()),
+            normal_button: materials.add(Color::rgb(0.15, 0.15, 0.15).into()),
+            hovered_button: materials.add(Color::rgb(0.25, 0.25, 0.25).into()),
         }
     }
 }
@@ -47,89 +48,87 @@ type UpdatedButton = (Mutated<Interaction>, With<Button>);
 
 /// Handles clicks on the `Play` button.
 fn button_system(
-    button_materials: Res<ButtonMaterials>,
+    materials: Res<MenuMaterials>,
     mut interaction_query: Query<(&Interaction, &mut Handle<ColorMaterial>), UpdatedButton>,
     mut state: ResMut<State<GameState>>,
 ) {
     for (interaction, mut material) in interaction_query.iter_mut() {
         match *interaction {
             Interaction::Clicked => state.set_next(GameState::InGame).unwrap(),
-            Interaction::Hovered => *material = button_materials.hovered.clone(),
-            Interaction::None => *material = button_materials.normal.clone(),
+            Interaction::Hovered => *material = materials.hovered_button.clone(),
+            Interaction::None => *material = materials.normal_button.clone(),
         }
     }
 }
 
-/// Setup the camera define the text for the main menu.
+/// Setup the title and `Play` button in the main menu.
 fn setup_menu(
     commands: &mut Commands,
     asset_server: Res<AssetServer>,
-    button_materials: Res<ButtonMaterials>,
+    materials: Res<MenuMaterials>,
 ) {
     let font = asset_server.load("FiraSans-Bold.ttf");
 
     commands
-        // UI camera
         .spawn(CameraUiBundle::default())
-        // texture
-        .spawn(TextBundle {
+        .spawn(NodeBundle {
             style: Style {
-                align_self: AlignSelf::Center,
-
-                ..Style::default()
-            },
-            text: Text {
-                value: "Baobei needs".to_string(),
-                font: font.clone(),
-                style: TextStyle {
-                    font_size: 60.0,
-                    color: Color::WHITE,
-                    ..TextStyle::default()
-                },
-            },
-            ..TextBundle::default()
-        });
-    let title_entity = commands.current_entity().unwrap();
-
-    commands
-        .spawn(ButtonBundle {
-            style: Style {
-                size: Size::new(Val::Px(150.0), Val::Px(65.0)),
-                // center button
-                margin: Rect::all(Val::Auto),
-                // horizontally center child text
+                size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
                 justify_content: JustifyContent::Center,
-                // vertically center child text
                 align_items: AlignItems::Center,
+                flex_direction: FlexDirection::ColumnReverse,
                 ..Style::default()
             },
-            material: button_materials.normal.clone(),
-            ..ButtonBundle::default()
+            material: materials.none.clone(),
+            ..NodeBundle::default()
         })
         .with_children(|parent| {
-            parent.spawn(TextBundle {
-                text: Text {
-                    value: "Play".to_string(),
-                    font: font.clone(),
-                    style: TextStyle {
-                        font_size: 40.0,
-                        color: Color::rgb(0.9, 0.9, 0.9),
-                        ..TextStyle::default()
+            parent
+                .spawn(TextBundle {
+                    text: Text {
+                        value: "Baobei needs".to_string(),
+                        font: font.clone(),
+                        style: TextStyle {
+                            font_size: 125.0,
+                            color: Color::WHITE,
+                            ..TextStyle::default()
+                        },
                     },
-                },
-                ..TextBundle::default()
-            });
+                    ..TextBundle::default()
+                })
+                .spawn(ButtonBundle {
+                    style: Style {
+                        margin: Rect::all(Val::Px(25.0)),
+                        size: Size::new(Val::Px(150.0), Val::Px(65.0)),
+                        justify_content: JustifyContent::Center, // horizontally center child text
+                        align_items: AlignItems::Center,         // vertically center child text
+                        ..Style::default()
+                    },
+                    material: materials.normal_button.clone(),
+                    ..ButtonBundle::default()
+                })
+                .with_children(|parent| {
+                    parent.spawn(TextBundle {
+                        text: Text {
+                            value: "Play".to_string(),
+                            font: font.clone(),
+                            style: TextStyle {
+                                font_size: 40.0,
+                                color: Color::WHITE,
+                                ..TextStyle::default()
+                            },
+                        },
+                        ..TextBundle::default()
+                    });
+                });
         });
-    let button_entity = commands.current_entity().unwrap();
 
     commands.insert_resource(MenuData {
-        title: title_entity,
-        button: button_entity,
+        entity_wrapper: commands.current_entity().unwrap(),
     });
 }
 
 /// Removes all entities of the menu.
 fn cleanup_menu(commands: &mut Commands, menu_data: Res<MenuData>) {
-    commands.despawn_recursive(menu_data.title);
-    commands.despawn_recursive(menu_data.button);
+    commands.despawn_recursive(menu_data.entity_wrapper);
 }
