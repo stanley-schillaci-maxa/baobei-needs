@@ -23,7 +23,7 @@ impl Plugin for GameplayPlugin {
             .add_startup_system(spawn_didi.system())
             .on_state_update(STAGE, GameState::InGame, back_to_menu_system.system())
             .on_state_update(STAGE, GameState::InGame, movement_system.system())
-            .on_state_update(STAGE, GameState::InGame, drawing_system.system());
+            .on_state_update(STAGE, GameState::InGame, drawing_position_system.system());
     }
 }
 
@@ -64,17 +64,21 @@ fn setup_camera(commands: &mut Commands) {
     commands.spawn(camera_2d);
 }
 
-
 /// Spawn the entity for Didi, the player.
 fn spawn_didi(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+    let position = Position(Vec3::new(640.0, 260.0, 0.0));
+    let mut transform = Transform::from_scale(Vec3::new(0.3, 0.3, 0.0));
+
+    update_drawing_position(&position, &mut transform);
+
     commands
         .spawn(SpriteBundle {
             material: materials.didi_sprite.clone(),
-            transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
+            transform,
             ..SpriteBundle::default()
         })
         .with(Didi)
-        .with(Position(Vec3::new(640.0, 260.0, 0.0)))
+        .with(position)
         .with(BoxCollider::new(100.0, 100.0));
 }
 
@@ -93,13 +97,18 @@ fn movement_system(
 }
 
 /// Updates position of the sprite with the position of the entity
-fn drawing_system(mut query: Query<(&Position, &mut Transform), Changed<Position>>) {
+fn drawing_position_system(mut query: Query<(&Position, &mut Transform), Changed<Position>>) {
     for (position, mut transform) in query.iter_mut() {
-        transform.translation = position.0;
-
-        // Scale the z index between 0 and 1000 depending on the y index.
-        transform.translation.z = 1000.0 - position.0.y * 1000.0 / WINDOW_HEIGHT;
+        update_drawing_position(position, &mut transform);
     }
+}
+
+/// Updates position of the sprite with the position of the entity
+fn update_drawing_position(position: &Position, transform: &mut Transform) {
+    transform.translation = position.0;
+
+    // Scale the z index between 0 and 1000 depending on the y index.
+    transform.translation.z = 1000.0 - position.0.y * 1000.0 / WINDOW_HEIGHT;
 }
 
 /// Goes back to the menu state when the player press `Escape`.
