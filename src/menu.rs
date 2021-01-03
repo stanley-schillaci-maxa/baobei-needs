@@ -74,7 +74,7 @@ fn setup_menu(
         .spawn(NodeBundle {
             style: Style {
                 size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
-                justify_content: JustifyContent::Center,
+                padding: Rect::all(Val::Px(50.0)),
                 align_items: AlignItems::Center,
                 flex_direction: FlexDirection::ColumnReverse,
                 ..Style::default()
