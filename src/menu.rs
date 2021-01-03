@@ -19,7 +19,7 @@ impl Plugin for MenuPlugin {
 /// Stores entities in the menu phase
 struct MenuData {
     /// Entity wrapping all menu entities (title, buttons)
-    entity_wrapper: Entity,
+    node_wrapper: Entity,
 }
 
 /// Colors of the button.
@@ -67,10 +67,11 @@ fn setup_menu(
     asset_server: Res<AssetServer>,
     materials: Res<MenuMaterials>,
 ) {
+    commands.spawn(CameraUiBundle::default());
+
     let font = asset_server.load("FiraSans-Bold.ttf");
 
-    commands
-        .spawn(CameraUiBundle::default())
+    let node_wrapper = commands
         .spawn(NodeBundle {
             style: Style {
                 size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
@@ -121,14 +122,14 @@ fn setup_menu(
                         ..TextBundle::default()
                     });
                 });
-        });
+        })
+        .current_entity()
+        .unwrap();
 
-    commands.insert_resource(MenuData {
-        entity_wrapper: commands.current_entity().unwrap(),
-    });
+    commands.insert_resource(MenuData { node_wrapper });
 }
 
 /// Removes all entities of the menu.
 fn cleanup_menu(commands: &mut Commands, menu_data: Res<MenuData>) {
-    commands.despawn_recursive(menu_data.entity_wrapper);
+    commands.despawn_recursive(menu_data.node_wrapper);
 }
