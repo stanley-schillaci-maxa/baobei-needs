@@ -1,5 +1,8 @@
 /// Systems of the menu phase.
-use bevy::{input::system::exit_on_esc_system, prelude::*};
+use bevy::{
+    input::{keyboard::KeyboardInput, system::exit_on_esc_system, ElementState},
+    prelude::*,
+};
 
 use crate::constants::{GameState, STAGE};
 
@@ -11,6 +14,7 @@ impl Plugin for MenuPlugin {
         app.init_resource::<MenuMaterials>()
             .on_state_enter(STAGE, GameState::Menu, setup_menu.system())
             .on_state_update(STAGE, GameState::Menu, button_system.system())
+            .on_state_update(STAGE, GameState::Menu, play_on_space_system.system())
             .on_state_update(STAGE, GameState::Menu, exit_on_esc_system.system())
             .on_state_exit(STAGE, GameState::Menu, cleanup_menu.system());
     }
@@ -132,4 +136,23 @@ fn setup_menu(
 /// Removes all entities of the menu.
 fn cleanup_menu(commands: &mut Commands, menu_data: Res<MenuData>) {
     commands.despawn_recursive(menu_data.node_wrapper);
+}
+
+/// Start the game play when the player press `Space`.
+fn play_on_space_system(
+    mut keyboard_input_reader: Local<EventReader<KeyboardInput>>,
+    keyboard_input_events: Res<Events<KeyboardInput>>,
+    mut state: ResMut<State<GameState>>,
+) {
+    for event in keyboard_input_reader.iter(&keyboard_input_events) {
+        let space_pressed = matches!(event, KeyboardInput {
+            key_code: Some(KeyCode::Space),
+            state: ElementState::Pressed,
+            ..
+        });
+
+        if space_pressed {
+            state.set_next(GameState::InGame).unwrap();
+        }
+    }
 }
