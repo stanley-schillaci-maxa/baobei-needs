@@ -49,9 +49,9 @@ pub struct BoxCollider {
 
 impl BoxCollider {
     /// Creates a box collider with the given size.
-    pub fn new(x: f32, y: f32) -> Self {
+    pub fn new(width: f32, height: f32) -> Self {
         Self {
-            size: Vec2::new(x, y),
+            size: Vec2::new(width, height),
         }
     }
 }
