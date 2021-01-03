@@ -71,6 +71,8 @@ fn spawn_didi(commands: &mut Commands, materials: Res<GameplayMaterials>) {
 
     update_drawing_position(&position, &mut transform);
 
+    let box_collider = BoxCollider::new(100.0, 100.0);
+
     commands
         .spawn(SpriteBundle {
             material: materials.didi_sprite.clone(),
@@ -79,7 +81,8 @@ fn spawn_didi(commands: &mut Commands, materials: Res<GameplayMaterials>) {
         })
         .with(Didi)
         .with(position)
-        .with(BoxCollider::new(100.0, 100.0));
+        .with(Movement::default())
+        .with(box_collider);
 }
 
 /// Moves Didi toward the direction sent by controllers.
@@ -87,11 +90,11 @@ fn movement_system(
     time: Res<Time>,
     mut direction_event_reader: Local<EventReader<DirectionEvent>>,
     direction_events: Res<Events<DirectionEvent>>,
-    mut query: Query<&mut Position, With<Didi>>,
+    mut query: Query<&mut Movement, With<Didi>>,
 ) {
     for event in direction_event_reader.iter(&direction_events) {
-        for mut position in query.iter_mut() {
-            position.0 += event.direction * time.delta_seconds() * SPEED;
+        for mut movement in query.iter_mut() {
+            movement.0 = event.direction * time.delta_seconds() * SPEED;
         }
     }
 }

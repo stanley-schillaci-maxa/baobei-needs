@@ -34,14 +34,17 @@ impl Plugin for CollisionPlugin {
     }
 }
 
-/// Position
+/// Absolute position of the entity.
 #[derive(Clone, Copy, Debug, Default, Reflect)]
 #[reflect(Component)]
 pub struct Position(pub Vec3);
 
+/// Delta of the next movement the entity will do move to.
+pub struct Movement(pub Vec3);
+
+/// 2D Collider in a shape of a rectangle
 #[derive(Debug, Default, Reflect)]
 #[reflect(Component)]
-/// 2D Collider in a shape of a rectangle
 pub struct BoxCollider {
     /// The width and height of the box.
     pub size: Vec2,
@@ -89,8 +92,29 @@ pub enum ContactEvent {
     Stopped(Contact),
 }
 
-/// Compare positions of box colliders and emit contact events.
+/// Moves the position of moving entities depending on their movement.
+/// If the entity collides with another collider, then it will be stopped.
 pub fn collision_system(
+    mut moving_colliders: Query<(&mut Position, &BoxCollider, &mut Movement)>,
+    other_colliders: Query<(&Position, &BoxCollider), Without<Movement>>,
+) {
+    for (mut pos_a, col_a, mut mov_a) in moving_colliders.iter_mut() {
+        let next_pos_a = pos_a.0 + mov_a.0;
+
+        let no_collision = other_colliders
+            .iter()
+            .all(|(pos_b, col_b)| collide(next_pos_a, col_a.size, pos_b.0, col_b.size).is_none());
+
+        if no_collision {
+            pos_a.0 = next_pos_a;
+        }
+        *mov_a = Movement::default();
+    }
+}
+
+/// Compares positions of box colliders with trigger areas and emit trigger
+/// events.
+pub fn trigger_area_system(
     commands: &mut Commands,
     mut contact_events: ResMut<Events<ContactEvent>>,
     query: Query<(Entity, &Position, &BoxCollider)>,
