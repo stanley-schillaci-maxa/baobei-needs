@@ -44,6 +44,8 @@ struct Furniture;
 struct GameplayMaterials {
     /// Transparent color
     didi_sprite: Handle<ColorMaterial>,
+    /// Debug color of a collider
+    collider_color: Handle<ColorMaterial>,
 }
 
 impl FromResources for GameplayMaterials {
@@ -52,6 +54,7 @@ impl FromResources for GameplayMaterials {
         let asset_server = resources.get_mut::<AssetServer>().unwrap();
         Self {
             didi_sprite: materials.add(asset_server.load("didi.png").into()),
+            collider_color: materials.add(Color::GREEN.into()),
         }
     }
 }
@@ -82,6 +85,26 @@ fn spawn_didi(commands: &mut Commands, materials: Res<GameplayMaterials>) {
         .with(Didi)
         .with(position)
         .with(Movement::default())
+        .with(box_collider);
+}
+
+/// Spawn a temporary collider for testing.
+fn spawn_collider(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+    let position = Position(Vec3::new(900.0, 260.0, 0.0));
+    let mut transform = Transform::default();
+
+    update_drawing_position(&position, &mut transform);
+
+    let box_collider = BoxCollider::new(200.0, 200.0);
+
+    commands
+        .spawn(SpriteBundle {
+            material: materials.collider_color.clone(),
+            sprite: Sprite::new(box_collider.size),
+            transform,
+            ..SpriteBundle::default()
+        })
+        .with(position)
         .with(box_collider);
 }
 

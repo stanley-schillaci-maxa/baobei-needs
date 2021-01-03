@@ -40,9 +40,10 @@ impl Plugin for CollisionPlugin {
 pub struct Position(pub Vec3);
 
 /// Delta of the next movement the entity will do move to.
+#[derive(Default)]
 pub struct Movement(pub Vec3);
 
-/// 2D Collider in a shape of a rectangle
+/// Collider in a shape of a rectangle
 #[derive(Debug, Default, Reflect)]
 #[reflect(Component)]
 pub struct BoxCollider {
