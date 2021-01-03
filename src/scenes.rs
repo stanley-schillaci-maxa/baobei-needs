@@ -10,7 +10,7 @@ pub struct SceneLoaderPlugin;
 impl Plugin for SceneLoaderPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.register_type::<SpriteLoader>()
-            .add_startup_system(load_scene_system.system())
+            // .add_startup_system(load_scene_system.system())
             .add_system(load_sprite_system.system());
     }
 }
@@ -26,7 +26,7 @@ pub struct SpriteLoader {
 }
 
 /// Hot reloads the scene file.
-pub fn load_scene_system(asset_server: Res<AssetServer>, mut scene_spawner: ResMut<SceneSpawner>) {
+pub fn _load_scene_system(asset_server: Res<AssetServer>, mut scene_spawner: ResMut<SceneSpawner>) {
     let scene_handle: Handle<DynamicScene> = asset_server.load("scene.scn");
 
     scene_spawner.spawn_dynamic(scene_handle);
