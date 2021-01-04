@@ -17,6 +17,7 @@
 mod collisions;
 mod constants;
 mod controllers;
+mod drawing;
 mod gameplay;
 mod menu;
 mod scenes;
@@ -26,6 +27,7 @@ use bevy::prelude::*;
 use collisions::CollisionPlugin;
 use constants::{GameState, STAGE, WINDOW_HEIGHT, WINDOW_WIDTH};
 use controllers::ControllerPlugin;
+use drawing::DrawingPlugin;
 use gameplay::GameplayPlugin;
 use menu::MenuPlugin;
 use scenes::SceneLoaderPlugin;
@@ -46,5 +48,6 @@ fn main() {
         .add_plugin(SceneLoaderPlugin)
         .add_plugin(MenuPlugin)
         .add_plugin(GameplayPlugin)
+        .add_plugin(DrawingPlugin)
         .run();
 }

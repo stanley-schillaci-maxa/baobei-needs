@@ -7,6 +7,7 @@ use bevy::{
 use crate::{
     collisions::{BoxCollider, Movement, Position, TriggerArea},
     constants::{GameState, SPEED, WINDOW_HEIGHT, WINDOW_WIDTH},
+    drawing::update_drawing_position,
 };
 use crate::{constants::STAGE, controllers::DirectionEvent};
 
@@ -24,8 +25,7 @@ impl Plugin for GameplayPlugin {
             .add_startup_system(spawn_collider.system())
             .add_startup_system(spawn_trigger_area.system())
             .on_state_update(STAGE, GameState::InGame, back_to_menu_system.system())
-            .on_state_update(STAGE, GameState::InGame, movement_system.system())
-            .on_state_update(STAGE, GameState::InGame, drawing_position_system.system());
+            .on_state_update(STAGE, GameState::InGame, movement_system.system());
     }
 }
 
@@ -145,21 +145,6 @@ fn movement_system(
             movement.0 = event.direction * time.delta_seconds() * SPEED;
         }
     }
-}
-
-/// Updates position of the sprite with the position of the entity
-fn drawing_position_system(mut query: Query<(&Position, &mut Transform), Changed<Position>>) {
-    for (position, mut transform) in query.iter_mut() {
-        update_drawing_position(position, &mut transform);
-    }
-}
-
-/// Updates position of the sprite with the position of the entity
-fn update_drawing_position(position: &Position, transform: &mut Transform) {
-    transform.translation = position.0;
-
-    // Scale the z index between 0 and 1000 depending on the y index.
-    transform.translation.z = 1000.0 - position.0.y * 1000.0 / WINDOW_HEIGHT;
 }
 
 /// Goes back to the menu state when the player press `Escape`.
