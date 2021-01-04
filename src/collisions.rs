@@ -16,7 +16,8 @@ pub struct CollisionPlugin;
 
 impl Plugin for CollisionPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_event::<ContactEvent>()
+        app.init_resource::<CollisionMaterials>()
+            .add_event::<ContactEvent>()
             .register_type::<Position>()
             .register_type::<BoxCollider>()
             .init_resource::<ColliderViewers>()
@@ -174,6 +175,8 @@ pub fn trigger_area_system(
 struct CollisionMaterials {
     /// Debug color for the `BoxCollider`
     collider: Handle<ColorMaterial>,
+    /// Debug color for the `TriggerArea`
+    trigger_area: Handle<ColorMaterial>,
 }
 
 impl FromResources for CollisionMaterials {
@@ -181,18 +184,22 @@ impl FromResources for CollisionMaterials {
         let mut materials = resources.get_mut::<Assets<ColorMaterial>>().unwrap();
         Self {
             collider: materials.add(Color::rgba(0.3, 1.0, 0.3, 0.3).into()),
+            trigger_area: materials.add(Color::rgba(0.3, 0.3, 1.0, 0.3).into()),
         }
     }
 }
 
 /// Component tagging an entity that there is a debugger view for its collider.  
 struct ViewedCollider;
-/// Component tagging an entity as a collider viewer
-struct ColliderViewer;
+/// Component tagging an entity that there is a debugger view for its trigger area.  
+struct ViewedTriggerArea;
 
-/// Lobby containing connected gamepads.
+/// Component tagging an entity as a collider viewer
+struct Viewer;
+
+/// Stores a map of collider viewers: `{ entity_with_collider => viewer_entities }`
 #[derive(Default)]
-struct ColliderViewers(HashMap<Entity, Entity>);
+struct ColliderViewers(HashMap<Entity, Vec<Entity>>);
 
 /// Adds to entities with a `SpritLoader` the related `SpriteBundle`.
 fn add_collider_viewer_system(
@@ -200,44 +207,87 @@ fn add_collider_viewer_system(
     mut viewers: ResMut<ColliderViewers>,
     materials: ResMut<CollisionMaterials>,
     non_viewed_colliders: Query<(Entity, &BoxCollider, &Position), Without<ViewedCollider>>,
+    non_viewed_trigger_areas: Query<(Entity, &TriggerArea, &Position), Without<ViewedTriggerArea>>,
 ) {
-    for (entity, box_collider, pos) in non_viewed_colliders.iter() {
+    let viewer_pos_from = |pos: &Position| {
+        let mut viewer_pos = Position(pos.0);
+        viewer_pos.0.y = pos.0.y - 1.0; // Move the viewer forward
+        viewer_pos
+    };
+
+    for (entity, collider, pos) in non_viewed_colliders.iter() {
         commands.insert_one(entity, ViewedCollider);
 
-        viewers.0.entry(entity).or_insert_with(|| {
-            let mut viewer_pos = Position(pos.0);
-            viewer_pos.0.y = pos.0.y - 1.0; // Move the collision viewer forward
+        let viewer = spawn_viewer(
+            commands,
+            viewer_pos_from(pos),
+            collider.size,
+            materials.collider.clone(),
+        );
 
-            commands
-                .spawn((ColliderViewer, viewer_pos))
-                .with_bundle(SpriteBundle {
-                    material: materials.collider.clone(),
-                    sprite: Sprite::new(box_collider.size),
-                    ..SpriteBundle::default()
-                })
-                .current_entity()
-                .unwrap()
-        });
+        viewers
+            .0
+            .entry(entity)
+            .or_insert_with(Vec::new)
+            .push(viewer);
+    }
+    for (entity, trigger_area, pos) in non_viewed_trigger_areas.iter() {
+        commands.insert_one(entity, ViewedTriggerArea);
+
+        let viewer = spawn_viewer(
+            commands,
+            viewer_pos_from(pos),
+            trigger_area.size,
+            materials.trigger_area.clone(),
+        );
+
+        viewers
+            .0
+            .entry(entity)
+            .or_insert_with(Vec::new)
+            .push(viewer);
     }
 }
 
+/// Spawns a viewer at the given position and size and returns the entity.  
+fn spawn_viewer(
+    commands: &mut Commands,
+    pos: Position,
+    size: Vec2,
+    color: Handle<ColorMaterial>,
+) -> Entity {
+    commands
+        .spawn((Viewer, pos))
+        .with_bundle(SpriteBundle {
+            material: color,
+            sprite: Sprite::new(size),
+            ..SpriteBundle::default()
+        })
+        .current_entity()
+        .unwrap()
+}
+
 /// Query filter of a entity with a moved collider.
-type MovedCollider = (Changed<Position>, With<ViewedCollider>);
+type MovedCollider = (
+    Changed<Position>,
+    Without<Viewer>,
+    Or<(With<ViewedCollider>, With<ViewedTriggerArea>)>,
+);
 
 /// Adds to entities with a `SpritLoader` the related `SpriteBundle`.
 fn update_collider_viewers_system(
-    viewers: Res<ColliderViewers>,
-    moved_colliders: Query<(Entity, &BoxCollider, &Position), MovedCollider>,
-    mut viewer_query: Query<(&ColliderViewer, &mut Position)>,
+    all_viewers: Res<ColliderViewers>,
+    moved_colliders: Query<(Entity, &Position), MovedCollider>,
+    mut viewer_query: Query<&mut Position, With<Viewer>>,
 ) {
-    for (entity, _, pos) in moved_colliders.iter() {
-        if let Some((_, mut viewer_pos)) = viewers
-            .0
-            .get(&entity)
-            .and_then(|&viewer| viewer_query.get_mut(viewer).ok())
-        {
-            viewer_pos.0 = pos.0;
-            viewer_pos.0.y = pos.0.y - 1.0; // Move the collision viewer forward
+    for (entity, pos) in moved_colliders.iter() {
+        if let Some(viewers) = all_viewers.0.get(&entity) {
+            for viewer in viewers {
+                if let Ok(mut viewer_pos) = viewer_query.get_mut(*viewer) {
+                    viewer_pos.0 = pos.0;
+                    viewer_pos.0.y = pos.0.y - 1.0; // Move the collision viewer forward
+                }
+            }
         }
     }
 }
