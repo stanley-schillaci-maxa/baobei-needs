@@ -170,6 +170,21 @@ pub fn trigger_area_system(
     }
 }
 
+/// Colors of the button.
+struct CollisionMaterials {
+    /// Debug color for the `BoxCollider`
+    collider: Handle<ColorMaterial>,
+}
+
+impl FromResources for CollisionMaterials {
+    fn from_resources(resources: &Resources) -> Self {
+        let mut materials = resources.get_mut::<Assets<ColorMaterial>>().unwrap();
+        Self {
+            collider: materials.add(Color::rgba(0.3, 1.0, 0.3, 0.3).into()),
+        }
+    }
+}
+
 /// Component tagging an entity that there is a debugger view for its collider.  
 struct ViewedCollider;
 /// Component tagging an entity as a collider viewer
@@ -183,12 +198,10 @@ struct ColliderViewers(HashMap<Entity, Entity>);
 fn add_collider_viewer_system(
     commands: &mut Commands,
     mut viewers: ResMut<ColliderViewers>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
+    materials: ResMut<CollisionMaterials>,
     non_viewed_colliders: Query<(Entity, &BoxCollider, &Position), Without<ViewedCollider>>,
 ) {
     for (entity, box_collider, pos) in non_viewed_colliders.iter() {
-        let color_handle = materials.add(Color::rgba(0.3, 1.0, 0.3, 0.3).into());
-
         commands.insert_one(entity, ViewedCollider);
 
         viewers.0.entry(entity).or_insert_with(|| {
@@ -198,7 +211,7 @@ fn add_collider_viewer_system(
             commands
                 .spawn((ColliderViewer, viewer_pos))
                 .with_bundle(SpriteBundle {
-                    material: color_handle,
+                    material: materials.collider.clone(),
                     sprite: Sprite::new(box_collider.size),
                     ..SpriteBundle::default()
                 })
