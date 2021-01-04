@@ -21,6 +21,7 @@ impl Plugin for CollisionPlugin {
             .register_type::<BoxCollider>()
             .init_resource::<ColliderViewers>()
             .on_state_update(STAGE, GameState::InGame, collision_system.system())
+            .on_state_update(STAGE, GameState::InGame, trigger_area_system.system())
             .on_state_update(
                 STAGE,
                 GameState::InGame,
@@ -44,7 +45,7 @@ pub struct Position(pub Vec3);
 pub struct Movement(pub Vec3);
 
 /// Collider in a shape of a rectangle
-#[derive(Debug, Default, Reflect)]
+#[derive(Clone, Debug, Default, Reflect)]
 #[reflect(Component)]
 pub struct BoxCollider {
     /// The width and height of the box.
@@ -52,6 +53,23 @@ pub struct BoxCollider {
 }
 
 impl BoxCollider {
+    /// Creates a box collider with the given size.
+    pub fn new(width: f32, height: f32) -> Self {
+        Self {
+            size: Vec2::new(width, height),
+        }
+    }
+}
+
+/// A rectangle area that can be contacted without collision.
+#[derive(Clone, Debug, Default, Reflect)]
+#[reflect(Component)]
+pub struct TriggerArea {
+    /// The width and height of the box.
+    pub size: Vec2,
+}
+
+impl TriggerArea {
     /// Creates a box collider with the given size.
     pub fn new(width: f32, height: f32) -> Self {
         Self {
@@ -118,24 +136,19 @@ pub fn collision_system(
 pub fn trigger_area_system(
     commands: &mut Commands,
     mut contact_events: ResMut<Events<ContactEvent>>,
-    query: Query<(Entity, &Position, &BoxCollider)>,
+    moving_colliders: Query<(Entity, &Position, &BoxCollider), With<Movement>>,
+    trigger_areas: Query<(Entity, &Position, &TriggerArea)>,
     contacts: Query<(&Contact, Entity)>,
 ) {
-    use itertools::Itertools;
+    let mut next_contacts: HashSet<Contact> = HashSet::new();
 
-    let next_contacts: HashSet<_> = query
-        .iter()
-        .combinations_with_replacement(2)
-        .filter_map(|pair| {
-            let (entity_a, pos_a, collider_a) = pair[0];
-            let (entity_b, pos_b, collider_b) = pair[1];
-
-            let size_a = collider_a.size;
-            let size_b = collider_b.size;
-
-            collide(pos_a.0, size_a, pos_b.0, size_b).map(|_| Contact(entity_a, entity_b))
-        })
-        .collect();
+    for (entity_a, pos_a, col_a) in moving_colliders.iter() {
+        for (entity_b, pos_b, area_b) in trigger_areas.iter() {
+            if collide(pos_a.0, col_a.size, pos_b.0, area_b.size).is_some() {
+                next_contacts.insert(Contact(entity_a, entity_b));
+            }
+        }
+    }
 
     let prev_entities: HashMap<_, _> = contacts.iter().map(|(&c, e)| (c, e)).collect();
     let prev_contacts: HashSet<_> = prev_entities.keys().copied().collect();
