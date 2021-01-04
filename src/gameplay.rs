@@ -5,7 +5,7 @@ use bevy::{
 };
 
 use crate::{
-    collisions::{BoxCollider, Position},
+    collisions::{BoxCollider, Movement, Position, TriggerArea},
     constants::{GameState, SPEED, WINDOW_HEIGHT, WINDOW_WIDTH},
 };
 use crate::{constants::STAGE, controllers::DirectionEvent};
@@ -21,6 +21,8 @@ impl Plugin for GameplayPlugin {
             .register_type::<Baobei>()
             .add_startup_system(setup_camera.system())
             .add_startup_system(spawn_didi.system())
+            .add_startup_system(spawn_collider.system())
+            .add_startup_system(spawn_trigger_area.system())
             .on_state_update(STAGE, GameState::InGame, back_to_menu_system.system())
             .on_state_update(STAGE, GameState::InGame, movement_system.system())
             .on_state_update(STAGE, GameState::InGame, drawing_position_system.system());
@@ -46,6 +48,8 @@ struct GameplayMaterials {
     didi_sprite: Handle<ColorMaterial>,
     /// Debug color of a collider
     collider_color: Handle<ColorMaterial>,
+    /// Debug color of a trigger area
+    trigger_area_color: Handle<ColorMaterial>,
 }
 
 impl FromResources for GameplayMaterials {
@@ -55,6 +59,7 @@ impl FromResources for GameplayMaterials {
         Self {
             didi_sprite: materials.add(asset_server.load("didi.png").into()),
             collider_color: materials.add(Color::GREEN.into()),
+            trigger_area_color: materials.add(Color::AQUAMARINE.into()),
         }
     }
 }
@@ -106,6 +111,26 @@ fn spawn_collider(commands: &mut Commands, materials: Res<GameplayMaterials>) {
         })
         .with(position)
         .with(box_collider);
+}
+
+/// Spawn a temporary trigger area for testing.
+fn spawn_trigger_area(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+    let position = Position(Vec3::new(300.0, 260.0, 0.0));
+    let mut transform = Transform::default();
+
+    update_drawing_position(&position, &mut transform);
+
+    let trigger_area = TriggerArea::new(200.0, 200.0);
+
+    commands
+        .spawn(SpriteBundle {
+            material: materials.trigger_area_color.clone(),
+            sprite: Sprite::new(trigger_area.size),
+            transform,
+            ..SpriteBundle::default()
+        })
+        .with(position)
+        .with(trigger_area);
 }
 
 /// Moves Didi toward the direction sent by controllers.
