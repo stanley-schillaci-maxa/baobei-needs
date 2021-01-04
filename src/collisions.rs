@@ -170,6 +170,8 @@ pub fn trigger_area_system(
     }
 }
 
+/// Component tagging an entity that there is a debugger view for its collider.  
+struct ViewedCollider;
 /// Component tagging an entity as a collider viewer
 struct ColliderViewer;
 
@@ -182,10 +184,12 @@ fn add_collider_viewer_system(
     commands: &mut Commands,
     mut viewers: ResMut<ColliderViewers>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    query: Query<(Entity, &BoxCollider, &Position), Changed<BoxCollider>>,
+    non_viewed_colliders: Query<(Entity, &BoxCollider, &Position), Without<ViewedCollider>>,
 ) {
-    for (entity, box_collider, pos) in query.iter() {
+    for (entity, box_collider, pos) in non_viewed_colliders.iter() {
         let color_handle = materials.add(Color::rgba(0.3, 1.0, 0.3, 0.3).into());
+
+        commands.insert_one(entity, ViewedCollider);
 
         viewers.0.entry(entity).or_insert_with(|| {
             let mut viewer_pos = Position(pos.0);
@@ -204,13 +208,16 @@ fn add_collider_viewer_system(
     }
 }
 
+/// Query filter of a entity with a moved collider.
+type MovedCollider = (Changed<Position>, With<ViewedCollider>);
+
 /// Adds to entities with a `SpritLoader` the related `SpriteBundle`.
 fn update_collider_viewers_system(
     viewers: Res<ColliderViewers>,
-    query: Query<(Entity, &BoxCollider, &Position), Changed<Position>>,
+    moved_colliders: Query<(Entity, &BoxCollider, &Position), MovedCollider>,
     mut viewer_query: Query<(&ColliderViewer, &mut Position)>,
 ) {
-    for (entity, _, pos) in query.iter() {
+    for (entity, _, pos) in moved_colliders.iter() {
         if let Some((_, mut viewer_pos)) = viewers
             .0
             .get(&entity)
