@@ -12,6 +12,7 @@
 mod collisions;
 mod constants;
 mod controllers;
+mod cooldown;
 mod drawing;
 mod gameplay;
 mod menu;
