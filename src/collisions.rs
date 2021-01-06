@@ -41,8 +41,9 @@ impl Plugin for CollisionPlugin {
 #[reflect(Component)]
 pub struct Position(pub Vec3);
 
-/// Delta of the next movement the entity will do move to.
-#[derive(Default)]
+/// Delta of the next movement the entity will do move to
+#[derive(Debug, Reflect, Default)]
+#[reflect(Component)]
 pub struct Movement(pub Vec3);
 
 /// Collider in a shape of a rectangle
@@ -81,7 +82,7 @@ impl TriggerArea {
 
 /// Represents a contact between two entities
 #[derive(Clone, Copy, Debug, Eq)]
-pub struct Contact(Entity, Entity);
+pub struct Contact(pub Entity, pub Entity);
 
 impl PartialEq for Contact {
     fn eq(&self, other: &Self) -> bool {

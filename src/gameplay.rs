@@ -6,7 +6,7 @@ use bevy::{
 };
 
 use crate::{
-    collisions::{BoxCollider, Movement, Position, TriggerArea},
+    collisions::{BoxCollider, Contact, Movement, Position, TriggerArea},
     constants::{GameState, SPEED, WINDOW_HEIGHT, WINDOW_WIDTH},
 };
 use crate::{constants::STAGE, controllers::DirectionEvent};
@@ -24,7 +24,8 @@ impl Plugin for GameplayPlugin {
             .add_startup_system(spawn_didi.system())
             .add_startup_system(spawn_colliders.system())
             .on_state_update(STAGE, GameState::InGame, back_to_menu_system.system())
-            .on_state_update(STAGE, GameState::InGame, movement_system.system());
+            .on_state_update(STAGE, GameState::InGame, movement_system.system())
+            .on_state_update(STAGE, GameState::InGame, pick_or_drop_system.system());
     }
 }
 
@@ -45,6 +46,12 @@ struct Furniture;
 struct GameplayMaterials {
     /// Transparent color
     didi_sprite: Handle<ColorMaterial>,
+}
+
+/// Stores entities in the gameplay phase
+struct GameData {
+    /// Entity of didi
+    didi_entity: Entity,
 }
 
 impl FromResources for GameplayMaterials {
@@ -81,18 +88,25 @@ fn spawn_didi(commands: &mut Commands, materials: Res<GameplayMaterials>) {
             transform,
             ..SpriteBundle::default()
         });
+
+    commands.insert_resource(GameData {
+        didi_entity: commands.current_entity().unwrap(),
+    });
 }
 
 /// Spawn a temporary colliders for testing.
 fn spawn_colliders(commands: &mut Commands) {
     commands.spawn((
         Position(Vec3::new(900.0, 260.0, 0.0)),
-        BoxCollider::new(200.0, 200.0),
+        BoxCollider::new(100.0, 100.0),
+        TriggerArea::new(150.0, 150.0),
+        ItemProducer(Item::WaterGlass),
     ));
     commands.spawn((
         Position(Vec3::new(300.0, 260.0, 0.0)),
         TriggerArea::new(200.0, 200.0),
         BoxCollider::new(100.0, 100.0),
+        ItemProducer(Item::IceCream),
     ));
 }
 
@@ -127,4 +141,53 @@ fn back_to_menu_system(
             state.set_next(GameState::Menu).unwrap();
         }
     }
+}
+
+/// An items that can be produced, carried and received.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Item {
+    /// A delicious ice cream
+    IceCream,
+    /// A glass of water
+    WaterGlass,
+    /// A bag of chips
+    Chips,
+}
+/// Component on entities carrying an item.
+pub struct Carrying(pub Item);
+
+/// Component on entities that can produce the item.
+pub struct ItemProducer(pub Item);
+
+/// Component on entities that can receive the item.
+pub struct ItemReceiver(pub Item);
+
+/// Pick or drop an item in an item producer.
+fn pick_or_drop_system(
+    commands: &mut Commands,
+    game_data: Res<GameData>,
+    keyboard_input: Res<Input<KeyCode>>,
+    contacts: Query<&Contact>,
+    item_producers: Query<&ItemProducer>,
+    carriers: Query<&Carrying, With<Didi>>,
+) {
+    if !keyboard_input.pressed(KeyCode::Space) {
+        return;
+    }
+    let didi = game_data.didi_entity;
+
+    contacts
+        .iter()
+        .filter(|contact| contact.0 == didi)
+        .filter_map(|contact| item_producers.get(contact.1).ok())
+        .for_each(|ItemProducer(produced_item)| match carriers.get(didi) {
+            Ok(Carrying(item)) if (item == produced_item) => {
+                dbg!("Drop item", item);
+                commands.remove_one::<Carrying>(didi);
+            }
+            _ => {
+                dbg!("Pick item", produced_item);
+                commands.insert_one(didi, Carrying(*produced_item));
+            }
+        });
 }
