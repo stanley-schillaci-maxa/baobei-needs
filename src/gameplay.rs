@@ -8,6 +8,7 @@ use bevy::{
 use crate::{
     collisions::{BoxCollider, Contact, Movement, Position, TriggerArea},
     constants::{GameState, SPEED, WINDOW_HEIGHT, WINDOW_WIDTH},
+    cooldown::Cooldown,
 };
 use crate::{constants::STAGE, controllers::DirectionEvent};
 
@@ -23,6 +24,7 @@ impl Plugin for GameplayPlugin {
             .add_startup_system(setup_camera.system())
             .add_startup_system(spawn_didi.system())
             .add_startup_system(spawn_colliders.system())
+            .add_resource(PickAndDropCooldown(Cooldown::from_seconds(0.5)))
             .on_state_update(STAGE, GameState::InGame, back_to_menu_system.system())
             .on_state_update(STAGE, GameState::InGame, movement_system.system())
             .on_state_update(STAGE, GameState::InGame, pick_or_drop_system.system());
@@ -162,16 +164,22 @@ pub struct ItemProducer(pub Item);
 /// Component on entities that can receive the item.
 pub struct ItemReceiver(pub Item);
 
+/// Cooldown of the action of picking or droping items.
+struct PickAndDropCooldown(Cooldown);
+
 /// Pick or drop an item in an item producer.
+#[allow(clippy::too_many_arguments)]
 fn pick_or_drop_system(
     commands: &mut Commands,
+    time: Res<Time>,
     game_data: Res<GameData>,
-    keyboard_input: Res<Input<KeyCode>>,
+    mut cooldown: ResMut<PickAndDropCooldown>,
+    keyboard: Res<Input<KeyCode>>,
     contacts: Query<&Contact>,
     item_producers: Query<&ItemProducer>,
     carriers: Query<&Carrying, With<Didi>>,
 ) {
-    if !keyboard_input.pressed(KeyCode::Space) {
+    if !cooldown.0.tick(time.delta_seconds()).available() || !keyboard.pressed(KeyCode::Space) {
         return;
     }
     let didi = game_data.didi_entity;
@@ -180,14 +188,20 @@ fn pick_or_drop_system(
         .iter()
         .filter(|contact| contact.0 == didi)
         .filter_map(|contact| item_producers.get(contact.1).ok())
-        .for_each(|ItemProducer(produced_item)| match carriers.get(didi) {
-            Ok(Carrying(item)) if (item == produced_item) => {
-                dbg!("Drop item", item);
-                commands.remove_one::<Carrying>(didi);
+        .for_each(|ItemProducer(produced_item)| {
+            match carriers.get(didi) {
+                Ok(Carrying(item)) if (item == produced_item) => {
+                    dbg!("Drop item", item);
+                    commands.remove_one::<Carrying>(didi);
+                }
+                Ok(Carrying(item)) => {
+                    dbg!("Keep item", item);
+                }
+                _ => {
+                    dbg!("Pick item", produced_item);
+                    commands.insert_one(didi, Carrying(*produced_item));
+                }
             }
-            _ => {
-                dbg!("Pick item", produced_item);
-                commands.insert_one(didi, Carrying(*produced_item));
-            }
+            cooldown.0.start();
         });
 }
