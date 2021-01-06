@@ -1,4 +1,5 @@
-/// Systems of the menu phase.
+//! Systems of the menu phase.
+
 use bevy::{
     input::{keyboard::KeyboardInput, system::exit_on_esc_system, ElementState},
     prelude::*,

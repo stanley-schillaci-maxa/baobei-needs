@@ -1,4 +1,5 @@
-/// Systems of the game phase
+//! Systems of the game phase
+
 use bevy::{
     input::{keyboard::KeyboardInput, ElementState},
     prelude::*,

@@ -1,4 +1,5 @@
-/// Systems and functions managing the display of things in the screen.
+//! Systems and functions managing the display of things in the screen.
+
 use bevy::prelude::*;
 
 use crate::{collisions::Position, constants::WINDOW_HEIGHT};
