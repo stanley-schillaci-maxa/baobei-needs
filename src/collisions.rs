@@ -156,14 +156,14 @@ pub fn trigger_area_system(
     let prev_contacts: HashSet<_> = prev_entities.keys().copied().collect();
 
     for &started_contact in next_contacts.difference(&prev_contacts) {
-        dbg!(started_contact);
+        debug!("Started contact: {:?}", started_contact);
 
         contact_events.send(ContactEvent::Started(started_contact));
         commands.spawn((started_contact,));
     }
 
     for stopped_contact in prev_contacts.difference(&next_contacts) {
-        dbg!(stopped_contact);
+        debug!("Stopped contact: {:?}", stopped_contact);
 
         contact_events.send(ContactEvent::Stopped(*stopped_contact));
         if let Some(&entity) = prev_entities.get(stopped_contact) {

@@ -191,14 +191,14 @@ fn pick_or_drop_system(
         .for_each(|ItemProducer(produced_item)| {
             match carriers.get(didi) {
                 Ok(Carrying(item)) if (item == produced_item) => {
-                    dbg!("Drop item", item);
+                    info!("Drop item {:?}", item);
                     commands.remove_one::<Carrying>(didi);
                 }
                 Ok(Carrying(item)) => {
-                    dbg!("Keep item", item);
+                    info!("Keep item {:?}", item);
                 }
                 _ => {
-                    dbg!("Pick item", produced_item);
+                    info!("Pick item {:?}", produced_item);
                     commands.insert_one(didi, Carrying(*produced_item));
                 }
             }
