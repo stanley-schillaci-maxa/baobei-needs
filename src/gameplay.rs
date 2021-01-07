@@ -25,7 +25,7 @@ impl Plugin for GameplayPlugin {
             .register_type::<Baobei>()
             .add_startup_system(setup_camera.system())
             .add_startup_system(spawn_didi_and_baobei.system())
-            .add_startup_system(spawn_colliders.system())
+            .add_startup_system(spawn_item_producers.system())
             .add_resource(PickAndDropCooldown(Cooldown::from_seconds(0.2)))
             .on_state_update(STAGE, GameState::InGame, back_to_menu_system.system())
             .on_state_update(STAGE, GameState::InGame, movement_system.system())
@@ -158,25 +158,36 @@ fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMateria
     });
 }
 
-/// Spawn a temporary colliders for testing.
-fn spawn_colliders(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+/// Spawn item producers.
+fn spawn_item_producers(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+    let trigger_area = TriggerArea::new(1750.0, 175.0);
+    let collider = BoxCollider::new(100.0, 100.0);
     commands
         .spawn((
-            Position(Vec3::new(900.0, 600.0, 0.0)),
-            BoxCollider::new(100.0, 100.0),
-            TriggerArea::new(150.0, 150.0),
             ItemProducer(Item::WaterGlass),
+            Position(Vec3::new(900.0, 600.0, 0.0)),
+            collider.clone(),
+            trigger_area.clone(),
         ))
         .with_bundle(SpriteBundle {
             material: materials.water_glass_sprite.clone(),
             ..SpriteBundle::default()
-        });
-    commands
+        })
         .spawn((
-            Position(Vec3::new(300.0, 600.0, 0.0)),
-            TriggerArea::new(200.0, 200.0),
-            BoxCollider::new(100.0, 100.0),
+            ItemProducer(Item::Chips),
+            Position(Vec3::new(600.0, 600.0, 0.0)),
+            collider.clone(),
+            trigger_area.clone(),
+        ))
+        .with_bundle(SpriteBundle {
+            material: materials.chips_sprite.clone(),
+            ..SpriteBundle::default()
+        })
+        .spawn((
             ItemProducer(Item::IceCream),
+            Position(Vec3::new(300.0, 600.0, 0.0)),
+            collider,
+            trigger_area,
         ))
         .with_bundle(SpriteBundle {
             material: materials.ice_cream_sprite.clone(),
