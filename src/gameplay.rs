@@ -140,7 +140,11 @@ fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMateria
             parent
                 .spawn(SpriteBundle {
                     material: materials.item_sprite_for(asked_item),
-                    transform: Transform::from_translation(Vec3::new(0.0, 450.0, 0.0)),
+                    transform: Transform {
+                        translation: Vec3::new(0.0, 475.0, 0.0),
+                        scale: Vec3::new(1.5, 1.5, 0.0),
+                        ..Transform::default()
+                    },
                     ..SpriteBundle::default()
                 })
                 .with(AskedItem);
