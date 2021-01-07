@@ -245,7 +245,9 @@ fn pick_or_drop_system(
         });
 }
 
-/// Pick or drop an item in an item producer.
+/// Handles action events:
+/// - Tag Didi with Carrying and spawn the item in hand when picking
+/// - Untag Didi with Carrying and despawn the item in hand when dropping
 fn handle_actions_system(
     commands: &mut Commands,
     mut action_event_reader: Local<EventReader<ActionEvent>>,
