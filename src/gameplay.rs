@@ -23,7 +23,7 @@ impl Plugin for GameplayPlugin {
             .register_type::<Furniture>()
             .register_type::<Baobei>()
             .add_startup_system(setup_camera.system())
-            .add_startup_system(spawn_didi.system())
+            .add_startup_system(spawn_didi_and_baobei.system())
             .add_startup_system(spawn_colliders.system())
             .add_resource(PickAndDropCooldown(Cooldown::from_seconds(0.2)))
             .on_state_update(STAGE, GameState::InGame, back_to_menu_system.system())
@@ -50,12 +50,16 @@ struct Furniture;
 struct GameData {
     /// Entity of didi
     didi_entity: Entity,
+    /// Entity of baobei
+    baobei_entity: Entity,
 }
 
 /// Sprites and colors in the gameplay phase.
 struct GameplayMaterials {
-    /// Transparent color
+    /// Sprite of didi
     didi_sprite: Handle<ColorMaterial>,
+    /// Sprite of baobei
+    baobei_sprite: Handle<ColorMaterial>,
     /// Sprite for the ice cream item
     ice_cream_sprite: Handle<ColorMaterial>,
     /// Sprite for the water glass item
@@ -70,6 +74,7 @@ impl FromResources for GameplayMaterials {
         let asset_server = resources.get_mut::<AssetServer>().unwrap();
         Self {
             didi_sprite: materials.add(asset_server.load("didi.png").into()),
+            baobei_sprite: materials.add(asset_server.load("baobei.png").into()),
             ice_cream_sprite: materials.add(asset_server.load("items/ice_cream.png").into()),
             water_glass_sprite: materials.add(asset_server.load("items/water_glass.png").into()),
             chips_sprite: materials.add(asset_server.load("items/chips.png").into()),
@@ -97,24 +102,39 @@ fn setup_camera(commands: &mut Commands) {
 }
 
 /// Spawn the entity for Didi, the player.
-fn spawn_didi(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMaterials>) {
     let position = Position(Vec3::new(640.0, 260.0, 0.0));
     let transform = Transform::from_scale(Vec3::new(0.3, 0.3, 0.0));
+    let collider = BoxCollider::new(75.0, 50.0);
 
-    // update_drawing_position(&position, &mut transform);
-
-    let collider = BoxCollider::new(150.0, 50.0);
-
-    commands
-        .spawn((Didi, position, collider, Movement::default()))
+    let didi_entity = commands
+        .spawn((Didi, position, collider.clone(), Movement::default()))
         .with_bundle(SpriteBundle {
             material: materials.didi_sprite.clone(),
             transform,
             ..SpriteBundle::default()
-        });
+        })
+        .current_entity()
+        .unwrap();
+
+    let baobei_entity = commands
+        .spawn((
+            Baobei,
+            Position(Vec3::new(1050.0, 235.0, 0.0)),
+            collider,
+            TriggerArea::new(150.0, 150.0),
+        ))
+        .with_bundle(SpriteBundle {
+            material: materials.baobei_sprite.clone(),
+            transform,
+            ..SpriteBundle::default()
+        })
+        .current_entity()
+        .unwrap();
 
     commands.insert_resource(GameData {
-        didi_entity: commands.current_entity().unwrap(),
+        didi_entity,
+        baobei_entity,
     });
 }
 
