@@ -32,7 +32,7 @@ fn main() {
     App::build()
         .add_resource(bevy::log::LogSettings {
             level: bevy::log::Level::INFO,
-            filter: "wgpu=warn,bevy_ecs=info".to_string(),
+            filter: "wgpu=error,bevy_ecs=info".to_string(),
         })
         .add_resource(WindowDescriptor {
             title: "Baobei needs".to_string(),
