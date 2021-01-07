@@ -18,6 +18,7 @@ pub struct GameplayPlugin;
 impl Plugin for GameplayPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.init_resource::<GameplayMaterials>()
+            .add_event::<ActionEvent>()
             .register_type::<Didi>()
             .register_type::<Furniture>()
             .register_type::<Baobei>()
@@ -27,7 +28,8 @@ impl Plugin for GameplayPlugin {
             .add_resource(PickAndDropCooldown(Cooldown::from_seconds(0.5)))
             .on_state_update(STAGE, GameState::InGame, back_to_menu_system.system())
             .on_state_update(STAGE, GameState::InGame, movement_system.system())
-            .on_state_update(STAGE, GameState::InGame, pick_or_drop_system.system());
+            .on_state_update(STAGE, GameState::InGame, pick_or_drop_system.system())
+            .on_state_update(STAGE, GameState::InGame, handle_actions_system.system());
     }
 }
 
@@ -164,17 +166,27 @@ pub struct ItemProducer(pub Item);
 /// Component on entities that can receive the item.
 pub struct ItemReceiver(pub Item);
 
+/// An event about an action the player made.
+enum ActionEvent {
+    /// The player picked the item.
+    Pick(Item),
+    /// The player dropped the item.
+    Drop(Item),
+    /// The player keep the item when trying to pick another one.
+    Keep(Item),
+}
+
 /// Cooldown of the action of picking or droping items.
 struct PickAndDropCooldown(Cooldown);
 
 /// Pick or drop an item in an item producer.
 #[allow(clippy::too_many_arguments)]
 fn pick_or_drop_system(
-    commands: &mut Commands,
     time: Res<Time>,
     game_data: Res<GameData>,
     mut cooldown: ResMut<PickAndDropCooldown>,
     keyboard: Res<Input<KeyCode>>,
+    mut action_events: ResMut<Events<ActionEvent>>,
     contacts: Query<&Contact>,
     item_producers: Query<&ItemProducer>,
     carriers: Query<&Carrying, With<Didi>>,
@@ -191,17 +203,35 @@ fn pick_or_drop_system(
         .for_each(|ItemProducer(produced_item)| {
             match carriers.get(didi) {
                 Ok(Carrying(item)) if (item == produced_item) => {
-                    info!("Drop item {:?}", item);
-                    commands.remove_one::<Carrying>(didi);
+                    action_events.send(ActionEvent::Drop(*item))
                 }
-                Ok(Carrying(item)) => {
-                    info!("Keep item {:?}", item);
-                }
-                _ => {
-                    info!("Pick item {:?}", produced_item);
-                    commands.insert_one(didi, Carrying(*produced_item));
-                }
+                Ok(Carrying(item)) => action_events.send(ActionEvent::Keep(*item)),
+                _ => action_events.send(ActionEvent::Pick(*produced_item)),
             }
             cooldown.0.start();
         });
+}
+
+/// Pick or drop an item in an item producer.
+fn handle_actions_system(
+    commands: &mut Commands,
+    mut action_event_reader: Local<EventReader<ActionEvent>>,
+    action_events: Res<Events<ActionEvent>>,
+    game_data: Res<GameData>,
+) {
+    let didi = game_data.didi_entity;
+
+    for action in action_event_reader.iter(&action_events) {
+        match action {
+            ActionEvent::Drop(item) => {
+                info!("Drop item {:?}", item);
+                commands.remove_one::<Carrying>(didi);
+            }
+            ActionEvent::Pick(item) => {
+                info!("Pick item {:?}", item);
+                commands.insert_one(didi, Carrying(*item));
+            }
+            ActionEvent::Keep(item) => info!("Keep item {:?}", item),
+        }
+    }
 }
