@@ -4,6 +4,7 @@ use bevy::{
     input::{keyboard::KeyboardInput, ElementState},
     prelude::*,
 };
+use rand::{distributions::Standard, prelude::Distribution, random, Rng};
 
 use crate::{
     collisions::{BoxCollider, Contact, Movement, Position, TriggerArea},
@@ -207,6 +208,17 @@ pub enum Item {
     /// A bag of chips
     Chips,
 }
+
+impl Distribution<Item> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Item {
+        match rng.gen_range(0..=2) {
+            0 => Item::IceCream,
+            1 => Item::WaterGlass,
+            _ => Item::Chips,
+        }
+    }
+}
+
 /// Component on entities carrying an item.
 pub struct Carrying(pub Item);
 
