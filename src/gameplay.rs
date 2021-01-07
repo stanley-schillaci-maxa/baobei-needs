@@ -119,19 +119,29 @@ fn spawn_didi(commands: &mut Commands, materials: Res<GameplayMaterials>) {
 }
 
 /// Spawn a temporary colliders for testing.
-fn spawn_colliders(commands: &mut Commands) {
-    commands.spawn((
-        Position(Vec3::new(900.0, 600.0, 0.0)),
-        BoxCollider::new(100.0, 100.0),
-        TriggerArea::new(150.0, 150.0),
-        ItemProducer(Item::WaterGlass),
-    ));
-    commands.spawn((
-        Position(Vec3::new(300.0, 600.0, 0.0)),
-        TriggerArea::new(200.0, 200.0),
-        BoxCollider::new(100.0, 100.0),
-        ItemProducer(Item::IceCream),
-    ));
+fn spawn_colliders(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+    commands
+        .spawn((
+            Position(Vec3::new(900.0, 600.0, 0.0)),
+            BoxCollider::new(100.0, 100.0),
+            TriggerArea::new(150.0, 150.0),
+            ItemProducer(Item::WaterGlass),
+        ))
+        .with_bundle(SpriteBundle {
+            material: materials.water_glass_sprite.clone(),
+            ..SpriteBundle::default()
+        });
+    commands
+        .spawn((
+            Position(Vec3::new(300.0, 600.0, 0.0)),
+            TriggerArea::new(200.0, 200.0),
+            BoxCollider::new(100.0, 100.0),
+            ItemProducer(Item::IceCream),
+        ))
+        .with_bundle(SpriteBundle {
+            material: materials.ice_cream_sprite.clone(),
+            ..SpriteBundle::default()
+        });
 }
 
 /// Moves Didi toward the direction sent by controllers.
