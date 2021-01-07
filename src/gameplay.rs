@@ -105,7 +105,7 @@ fn setup_camera(commands: &mut Commands) {
     commands.spawn(camera_2d);
 }
 
-/// Spawn the entity for Didi, the player.
+/// Spawn the entity for Didi, the player and Baodei.
 fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMaterials>) {
     let position = Position(Vec3::new(640.0, 260.0, 0.0));
     let transform = Transform::from_scale(Vec3::new(0.3, 0.3, 0.0));
@@ -160,7 +160,7 @@ fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMateria
 
 /// Spawn item producers.
 fn spawn_item_producers(commands: &mut Commands, materials: Res<GameplayMaterials>) {
-    let trigger_area = TriggerArea::new(1750.0, 175.0);
+    let trigger_area = TriggerArea::new(175.0, 175.0);
     let collider = BoxCollider::new(100.0, 100.0);
     commands
         .spawn((
@@ -271,6 +271,8 @@ enum ActionEvent {
     Drop(Item),
     /// The player keep the item when trying to pick another one.
     Keep(Item),
+    /// The player gave the item to Baobei.
+    Give(Item),
 }
 
 /// Cooldown of the action of picking or dropping items.
@@ -286,6 +288,7 @@ fn pick_or_drop_system(
     mut action_events: ResMut<Events<ActionEvent>>,
     contacts: Query<&Contact>,
     item_producers: Query<&ItemProducer>,
+    item_askers: Query<&AskingItem>,
     carriers: Query<&Carrying, With<Didi>>,
 ) {
     if !cooldown.0.tick(time.delta_seconds()).available() || !keyboard.pressed(KeyCode::Space) {
@@ -293,12 +296,14 @@ fn pick_or_drop_system(
     }
     let didi = game_data.didi_entity;
 
+    let carried_item = carriers.get(didi);
+
     contacts
         .iter()
         .filter(|contact| contact.0 == didi)
         .filter_map(|contact| item_producers.get(contact.1).ok())
         .for_each(|ItemProducer(produced_item)| {
-            match carriers.get(didi) {
+            match carried_item {
                 Ok(Carrying(item)) if (item == produced_item) => {
                     action_events.send(ActionEvent::Drop(*item))
                 }
@@ -307,11 +312,27 @@ fn pick_or_drop_system(
             }
             cooldown.0.start();
         });
+
+    contacts
+        .iter()
+        .filter(|contact| contact.0 == didi)
+        .filter_map(|contact| item_askers.get(contact.1).ok())
+        .for_each(|AskingItem(asked_item)| {
+            match carried_item {
+                Ok(Carrying(item)) if (item == asked_item) => {
+                    action_events.send(ActionEvent::Give(*item))
+                }
+                Ok(Carrying(item)) => action_events.send(ActionEvent::Keep(*item)),
+                _ => {}
+            }
+            cooldown.0.start();
+        });
 }
 
 /// Handles action events:
 /// - Tag Didi with Carrying and spawn the item in hand when picking
 /// - Untag Didi with Carrying and despawn the item in hand when dropping
+#[allow(clippy::too_many_arguments)]
 fn handle_actions_system(
     commands: &mut Commands,
     mut action_event_reader: Local<EventReader<ActionEvent>>,
@@ -319,6 +340,8 @@ fn handle_actions_system(
     game_data: Res<GameData>,
     materials: Res<GameplayMaterials>,
     carried_items: Query<Entity, With<CarriedItem>>,
+    mut asking_items: Query<&mut AskingItem, With<Baobei>>,
+    mut asked_item_materials: Query<&mut Handle<ColorMaterial>, With<AskedItem>>,
 ) {
     let didi = game_data.didi_entity;
 
@@ -349,6 +372,32 @@ fn handle_actions_system(
                 commands.push_children(didi, &[item_in_hand]);
             }
             ActionEvent::Keep(item) => info!("Keep item {:?}", item),
+            ActionEvent::Give(item) => {
+                info!("Give item {:?}", item);
+
+                commands.remove_one::<Carrying>(didi);
+                for item_in_hand in carried_items.iter() {
+                    commands.despawn(item_in_hand);
+                }
+
+                let next_item = random_different_item(*item);
+                for mut asking_item in asking_items.iter_mut() {
+                    asking_item.0 = next_item
+                }
+                for mut item_material in asked_item_materials.iter_mut() {
+                    *item_material = materials.item_sprite_for(next_item);
+                }
+            }
+        }
+    }
+}
+
+/// Returns a random item different than the given one.
+fn random_different_item(item: Item) -> Item {
+    loop {
+        let next_item = random::<Item>();
+        if next_item != item {
+            return next_item;
         }
     }
 }
