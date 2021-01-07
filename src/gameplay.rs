@@ -57,6 +57,8 @@ struct GameData {
 
 /// Sprites and colors in the gameplay phase.
 struct GameplayMaterials {
+    /// Transparent color
+    none: Handle<ColorMaterial>,
     /// Sprite of didi
     didi_sprite: Handle<ColorMaterial>,
     /// Sprite of baobei
@@ -74,6 +76,7 @@ impl FromResources for GameplayMaterials {
         let mut materials = resources.get_mut::<Assets<ColorMaterial>>().unwrap();
         let asset_server = resources.get_mut::<AssetServer>().unwrap();
         Self {
+            none: materials.add(Color::NONE.into()),
             didi_sprite: materials.add(asset_server.load("didi.png").into()),
             baobei_sprite: materials.add(asset_server.load("baobei.png").into()),
             ice_cream_sprite: materials.add(asset_server.load("items/ice_cream.png").into()),
@@ -118,17 +121,29 @@ fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMateria
         .current_entity()
         .unwrap();
 
+    let asked_item = random::<Item>();
+
     let baobei_entity = commands
         .spawn((
             Baobei,
             Position(Vec3::new(1050.0, 235.0, 0.0)),
             collider,
             TriggerArea::new(150.0, 150.0),
+            AskingItem(asked_item),
         ))
         .with_bundle(SpriteBundle {
             material: materials.baobei_sprite.clone(),
             transform,
             ..SpriteBundle::default()
+        })
+        .with_children(|parent| {
+            parent
+                .spawn(SpriteBundle {
+                    material: materials.item_sprite_for(asked_item),
+                    transform: Transform::from_translation(Vec3::new(0.0, 450.0, 0.0)),
+                    ..SpriteBundle::default()
+                })
+                .with(AskedItem);
         })
         .current_entity()
         .unwrap();
@@ -224,12 +239,14 @@ pub struct Carrying(pub Item);
 
 /// Component on entities that is a carried item.
 pub struct CarriedItem;
+/// Component on entities that is an asked item.
+pub struct AskedItem;
 
 /// Component on entities that can produce the item.
 pub struct ItemProducer(pub Item);
 
-/// Component on entities that can receive the item.
-pub struct ItemReceiver(pub Item);
+/// Component on entities that can ask for the item.
+pub struct AskingItem(pub Item);
 
 /// An event about an action the player made.
 enum ActionEvent {
