@@ -46,16 +46,16 @@ struct Baobei;
 #[reflect(Component)]
 struct Furniture;
 
-/// Sprites and colors in the gameplay phase.
-struct GameplayMaterials {
-    /// Transparent color
-    didi_sprite: Handle<ColorMaterial>,
-}
-
 /// Stores entities in the gameplay phase
 struct GameData {
     /// Entity of didi
     didi_entity: Entity,
+}
+
+/// Sprites and colors in the gameplay phase.
+struct GameplayMaterials {
+    /// Transparent color
+    didi_sprite: Handle<ColorMaterial>,
 }
 
 impl FromResources for GameplayMaterials {
