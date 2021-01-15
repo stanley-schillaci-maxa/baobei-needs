@@ -265,15 +265,15 @@ pub struct AskingItem(pub Item);
 
 /// An event about an action the player made.
 enum ActionEvent {
-    /// The player picked the item.
-    Pick(Item),
-    /// The player put away the item back in the item producer.
+    /// The player takes an item in the item producer.
+    Take(Item),
+    /// The player puts away the item back in the item producer.
     PutAway(Item),
-    /// The player drop the item on the ground.
+    /// The player drops the item on the ground.
     Drop(Item),
-    /// The player keep the item when trying to pick another one.
+    /// The player keeps the item when trying to pick another one.
     Keep(Item),
-    /// The player gave the item to Baobei.
+    /// The player gives the item to Baobei.
     Give(Item),
 }
 
@@ -300,6 +300,8 @@ fn pick_or_drop_system(
 
     let carried_item = carriers.get(didi);
 
+    // Pick an 
+
     // Pick or put away an item in a producer
     contacts
         .iter()
@@ -311,7 +313,7 @@ fn pick_or_drop_system(
                     action_events.send(ActionEvent::PutAway(*item))
                 }
                 Ok(Carrying(item)) => action_events.send(ActionEvent::Keep(*item)),
-                _ => action_events.send(ActionEvent::Pick(*produced_item)),
+                _ => action_events.send(ActionEvent::Take(*produced_item)),
             }
             cooldown.0.start();
         });
@@ -379,8 +381,8 @@ fn handle_actions_system(
                     commands.remove_one::<Parent>(item_in_hand);
                 }
             }
-            ActionEvent::Pick(item) => {
-                info!("Pick item {:?}", item);
+            ActionEvent::Take(item) => {
+                info!("Take item {:?}", item);
                 commands.insert_one(didi, Carrying(*item));
 
                 let item_in_hand = commands
