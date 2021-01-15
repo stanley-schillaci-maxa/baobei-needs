@@ -269,6 +269,8 @@ enum ActionEvent {
     Pick(Item),
     /// The player put away the item back in the item producer.
     PutAway(Item),
+    /// The player drop the item on the ground.
+    Drop(Item),
     /// The player keep the item when trying to pick another one.
     Keep(Item),
     /// The player gave the item to Baobei.
@@ -333,6 +335,14 @@ fn pick_or_drop_system(
             }
             cooldown.0.start();
         });
+
+    if !cooldown.0.available() {
+        return; // Avoid to do more than one action at once.
+    }
+
+    if let Ok(Carrying(item)) = carried_item {
+        action_events.send(ActionEvent::Drop(*item))
+    }
 }
 
 /// Handles action events:
@@ -359,6 +369,14 @@ fn handle_actions_system(
 
                 for item_in_hand in carried_items.iter() {
                     commands.despawn(item_in_hand);
+                }
+            }
+            ActionEvent::Drop(item) => {
+                info!("Drop the item {:?}", item);
+                commands.remove_one::<Carrying>(didi);
+
+                for item_in_hand in carried_items.iter() {
+                    commands.remove_one::<Parent>(item_in_hand);
                 }
             }
             ActionEvent::Pick(item) => {
