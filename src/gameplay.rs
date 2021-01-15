@@ -403,7 +403,7 @@ fn handle_actions_system(
                         item_to_drop,
                         (
                             Position(didi_position.0 + picked_item_translation * didi_scale),
-                            TriggerArea::new(50.0, 50.0),
+                            TriggerArea::new(75.0, 100.0),
                         ),
                     );
 
