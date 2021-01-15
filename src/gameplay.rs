@@ -315,7 +315,7 @@ fn pick_or_drop_system(
         });
 
     if !cooldown.0.available() {
-        return; // Avoid to do more than one action at once. 
+        return; // Avoid to do more than one action at once.
     }
 
     // Give an item to baobei

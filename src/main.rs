@@ -1,7 +1,13 @@
 //! A little game made with Bevy.
 
 // Clippy configuration
-#![deny(clippy::all, clippy::pedantic, clippy::nursery, clippy::cargo)]
+#![deny(
+    clippy::all,
+    clippy::pedantic,
+    clippy::nursery,
+    clippy::cargo,
+    missing_docs
+)]
 #![warn(clippy::clippy::missing_docs_in_private_items)]
 #![allow(
     clippy::needless_pass_by_value,
