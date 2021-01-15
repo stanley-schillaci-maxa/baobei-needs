@@ -14,7 +14,7 @@ impl Plugin for DrawingPlugin {
 }
 
 /// Updates position of the sprite with the position of the entity
-fn drawing_position_system(mut query: Query<(&Position, &mut Transform)>) {
+fn drawing_position_system(mut query: Query<(&Position, &mut Transform), Without<Parent>>) {
     for (position, mut transform) in query.iter_mut() {
         update_drawing_position(position, &mut transform);
     }

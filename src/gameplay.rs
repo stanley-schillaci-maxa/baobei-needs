@@ -374,8 +374,11 @@ fn handle_actions_system(
     mut asking_items: Query<&mut AskingItem, With<Baobei>>,
     mut asked_item_materials: Query<&mut Handle<ColorMaterial>, With<AskedItem>>,
     positions: Query<&Position>,
+    mut transforms: Query<&mut Transform>,
 ) {
     let didi = game_data.didi_entity;
+    let picked_item_translation = Vec3::new(-170.0, -10.0, 0.0);
+    let didi_scale = Vec3::new(0.3, 0.3, 0.0);
 
     for action in action_event_reader.iter(&action_events) {
         match action {
@@ -396,7 +399,17 @@ fn handle_actions_system(
 
                     commands.remove_one::<Parent>(item_to_drop);
                     commands.remove_one::<CarriedItem>(item_to_drop);
-                    commands.insert(item_to_drop, (*didi_position, TriggerArea::new(50.0, 50.0)));
+                    commands.insert(
+                        item_to_drop,
+                        (
+                            Position(didi_position.0 + picked_item_translation * didi_scale),
+                            TriggerArea::new(50.0, 50.0),
+                        ),
+                    );
+
+                    if let Ok(mut transform) = transforms.get_mut(item_to_drop) {
+                        transform.scale = didi_scale;
+                    }
                 }
             }
             ActionEvent::PickUp(item_entity, item) => {
@@ -407,6 +420,11 @@ fn handle_actions_system(
                 commands.remove_one::<Position>(*item_entity);
                 commands.remove_one::<TriggerArea>(*item_entity);
                 commands.push_children(didi, &[*item_entity]);
+
+                if let Ok(mut transform) = transforms.get_mut(*item_entity) {
+                    transform.translation = picked_item_translation;
+                    transform.scale = Vec3::one();
+                }
             }
             ActionEvent::Take(item) => {
                 info!("Take item {:?}", item);
@@ -415,7 +433,7 @@ fn handle_actions_system(
                 let item_in_hand = commands
                     .spawn(SpriteBundle {
                         material: materials.item_sprite_for(*item),
-                        transform: Transform::from_translation(Vec3::new(-170.0, -10.0, 0.0)),
+                        transform: Transform::from_translation(picked_item_translation),
                         ..SpriteBundle::default()
                     })
                     .with(*item)
