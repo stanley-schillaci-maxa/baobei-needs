@@ -267,8 +267,8 @@ pub struct AskingItem(pub Item);
 enum ActionEvent {
     /// The player picked the item.
     Pick(Item),
-    /// The player dropped the item.
-    Drop(Item),
+    /// The player put away the item back in the item producer.
+    PutAway(Item),
     /// The player keep the item when trying to pick another one.
     Keep(Item),
     /// The player gave the item to Baobei.
@@ -298,6 +298,7 @@ fn pick_or_drop_system(
 
     let carried_item = carriers.get(didi);
 
+    // Pick or put away an item in a producer
     contacts
         .iter()
         .filter(|contact| contact.0 == didi)
@@ -305,7 +306,7 @@ fn pick_or_drop_system(
         .for_each(|ItemProducer(produced_item)| {
             match carried_item {
                 Ok(Carrying(item)) if (item == produced_item) => {
-                    action_events.send(ActionEvent::Drop(*item))
+                    action_events.send(ActionEvent::PutAway(*item))
                 }
                 Ok(Carrying(item)) => action_events.send(ActionEvent::Keep(*item)),
                 _ => action_events.send(ActionEvent::Pick(*produced_item)),
@@ -313,6 +314,7 @@ fn pick_or_drop_system(
             cooldown.0.start();
         });
 
+    // Give an item to baobei
     contacts
         .iter()
         .filter(|contact| contact.0 == didi)
@@ -347,8 +349,8 @@ fn handle_actions_system(
 
     for action in action_event_reader.iter(&action_events) {
         match action {
-            ActionEvent::Drop(item) => {
-                info!("Drop item {:?}", item);
+            ActionEvent::PutAway(item) => {
+                info!("Put way item {:?}", item);
                 commands.remove_one::<Carrying>(didi);
 
                 for item_in_hand in carried_items.iter() {
