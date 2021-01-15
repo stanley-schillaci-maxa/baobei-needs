@@ -271,6 +271,8 @@ enum ActionEvent {
     PutAway(Item),
     /// The player drops the item on the ground.
     Drop(Item),
+    /// The player picks up an item on the ground.
+    PickUp(Entity, Item),
     /// The player keeps the item when trying to pick another one.
     Keep(Item),
     /// The player gives the item to Baobei.
@@ -291,6 +293,7 @@ fn pick_or_drop_system(
     contacts: Query<&Contact>,
     item_producers: Query<&ItemProducer>,
     item_askers: Query<&AskingItem>,
+    items: Query<(Entity, &Item)>,
     carriers: Query<&Carrying, With<Didi>>,
 ) {
     if !cooldown.0.tick(time.delta_seconds()).available() || !keyboard.pressed(KeyCode::Space) {
@@ -299,8 +302,6 @@ fn pick_or_drop_system(
     let didi = game_data.didi_entity;
 
     let carried_item = carriers.get(didi);
-
-    // Pick an 
 
     // Pick or put away an item in a producer
     contacts
@@ -342,8 +343,20 @@ fn pick_or_drop_system(
         return; // Avoid to do more than one action at once.
     }
 
+    // Drop or pick up the item to the ground
     if let Ok(Carrying(item)) = carried_item {
-        action_events.send(ActionEvent::Drop(*item))
+        action_events.send(ActionEvent::Drop(*item));
+        cooldown.0.start();
+    } else {
+        let item_on_the_ground = contacts
+            .iter()
+            .filter(|contact| contact.0 == didi)
+            .find_map(|contact| items.get(contact.1).ok());
+
+        if let Some((item_entity, item)) = item_on_the_ground {
+            action_events.send(ActionEvent::PickUp(item_entity, *item));
+            cooldown.0.start();
+        }
     }
 }
 
@@ -360,6 +373,7 @@ fn handle_actions_system(
     carried_items: Query<Entity, With<CarriedItem>>,
     mut asking_items: Query<&mut AskingItem, With<Baobei>>,
     mut asked_item_materials: Query<&mut Handle<ColorMaterial>, With<AskedItem>>,
+    positions: Query<&Position>,
 ) {
     let didi = game_data.didi_entity;
 
@@ -377,9 +391,22 @@ fn handle_actions_system(
                 info!("Drop the item {:?}", item);
                 commands.remove_one::<Carrying>(didi);
 
-                for item_in_hand in carried_items.iter() {
-                    commands.remove_one::<Parent>(item_in_hand);
+                for item_to_drop in carried_items.iter() {
+                    let didi_position = positions.get(didi).unwrap();
+
+                    commands.remove_one::<Parent>(item_to_drop);
+                    commands.remove_one::<CarriedItem>(item_to_drop);
+                    commands.insert(item_to_drop, (*didi_position, TriggerArea::new(50.0, 50.0)));
                 }
+            }
+            ActionEvent::PickUp(item_entity, item) => {
+                info!("Pick up the item {:?}", item);
+                commands.insert_one(didi, Carrying(*item));
+
+                commands.insert_one(*item_entity, CarriedItem);
+                commands.remove_one::<Position>(*item_entity);
+                commands.remove_one::<TriggerArea>(*item_entity);
+                commands.push_children(didi, &[*item_entity]);
             }
             ActionEvent::Take(item) => {
                 info!("Take item {:?}", item);
@@ -391,6 +418,7 @@ fn handle_actions_system(
                         transform: Transform::from_translation(Vec3::new(-170.0, -10.0, 0.0)),
                         ..SpriteBundle::default()
                     })
+                    .with(*item)
                     .with(CarriedItem)
                     .current_entity()
                     .unwrap();
