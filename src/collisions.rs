@@ -7,7 +7,11 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-use bevy::{prelude::*, sprite::collide_aabb::collide};
+use bevy::{
+    input::{keyboard::KeyboardInput, ElementState},
+    prelude::*,
+    sprite::collide_aabb::collide,
+};
 
 use crate::constants::{GameState, STAGE};
 
@@ -32,6 +36,11 @@ impl Plugin for CollisionPlugin {
                 STAGE,
                 GameState::InGame,
                 update_collider_viewers_system.system(),
+            )
+            .on_state_update(
+                STAGE,
+                GameState::InGame,
+                refresh_collider_viewers_system.system(),
             );
     }
 }
@@ -202,7 +211,7 @@ struct Viewer;
 #[derive(Default)]
 struct ColliderViewers(HashMap<Entity, Vec<Entity>>);
 
-/// Adds to entities with a `SpritLoader` the related `SpriteBundle`.
+/// Creates a viewer entity for all colliders and trigger areas without one.
 fn add_collider_viewer_system(
     commands: &mut Commands,
     mut viewers: ResMut<ColliderViewers>,
@@ -210,18 +219,12 @@ fn add_collider_viewer_system(
     non_viewed_colliders: Query<(Entity, &BoxCollider, &Position), Without<ViewedCollider>>,
     non_viewed_trigger_areas: Query<(Entity, &TriggerArea, &Position), Without<ViewedTriggerArea>>,
 ) {
-    let viewer_pos_from = |pos: &Position| {
-        let mut viewer_pos = Position(pos.0);
-        viewer_pos.0.y = pos.0.y - 1.0; // Move the viewer forward
-        viewer_pos
-    };
-
     for (entity, collider, pos) in non_viewed_colliders.iter() {
         commands.insert_one(entity, ViewedCollider);
 
         let viewer = spawn_viewer(
             commands,
-            viewer_pos_from(pos),
+            forwarded_position(pos),
             collider.size,
             materials.collider.clone(),
         );
@@ -237,7 +240,7 @@ fn add_collider_viewer_system(
 
         let viewer = spawn_viewer(
             commands,
-            viewer_pos_from(pos),
+            forwarded_position(pos),
             trigger_area.size,
             materials.trigger_area.clone(),
         );
@@ -285,10 +288,48 @@ fn update_collider_viewers_system(
         if let Some(viewers) = all_viewers.0.get(&entity) {
             for viewer in viewers {
                 if let Ok(mut viewer_pos) = viewer_query.get_mut(*viewer) {
-                    viewer_pos.0 = pos.0;
-                    viewer_pos.0.y = pos.0.y - 1.0; // Move the collision viewer forward
+                    *viewer_pos = forwarded_position(pos);
                 }
             }
         }
     }
+}
+
+/// Refresh the position of collision viewers when the player presses `D`.
+fn refresh_collider_viewers_system(
+    commands: &mut Commands,
+    mut keyboard_input_reader: Local<EventReader<KeyboardInput>>,
+    keyboard_input_events: Res<Events<KeyboardInput>>,
+    all_viewers: Res<ColliderViewers>,
+    collider_positions: Query<&Position, Without<Viewer>>,
+    mut viewer_positions: Query<&mut Position, With<Viewer>>,
+) {
+    for event in keyboard_input_reader.iter(&keyboard_input_events) {
+        let d_pressed = matches!(event, KeyboardInput {
+            key_code: Some(KeyCode::D),
+            state: ElementState::Pressed,
+            ..
+        });
+
+        if d_pressed {
+            for (collider, viewers) in &all_viewers.0 {
+                for viewer in viewers {
+                    if let Ok(pos) = collider_positions.get(*collider) {
+                        if let Ok(mut viewer_pos) = viewer_positions.get_mut(*viewer) {
+                            *viewer_pos = forwarded_position(pos);
+                        }
+                    } else {
+                        commands.despawn(*viewer);
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// Returns a copy of the given position placed a little bit forward.
+fn forwarded_position(pos: &Position) -> Position {
+    let mut new_pos = Position(pos.0);
+    new_pos.0.y = pos.0.y - 1.0;
+    new_pos
 }
