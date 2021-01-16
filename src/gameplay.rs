@@ -24,6 +24,7 @@ impl Plugin for GameplayPlugin {
             .register_type::<Furniture>()
             .register_type::<Baobei>()
             .add_startup_system(setup_camera.system())
+            .add_startup_system(spawn_furniture.system())
             .add_startup_system(spawn_didi_and_baobei.system())
             .add_startup_system(spawn_item_producers.system())
             .add_startup_system(spawn_boarders.system())
@@ -70,12 +71,21 @@ struct GameplayMaterials {
     water_glass_sprite: Handle<ColorMaterial>,
     /// Sprite for the chips item
     chips_sprite: Handle<ColorMaterial>,
+    /// Sprite for the fridge
+    fridge_sprite: Handle<ColorMaterial>,
+    /// Sprite for the couch
+    couch_sprite: Handle<ColorMaterial>,
+    /// Sprite for the kitchen
+    kitchen_sprite: Handle<ColorMaterial>,
+    /// Sprite for the sink
+    sink_sprite: Handle<ColorMaterial>,
 }
 
 impl FromResources for GameplayMaterials {
     fn from_resources(resources: &Resources) -> Self {
         let mut materials = resources.get_mut::<Assets<ColorMaterial>>().unwrap();
         let asset_server = resources.get_mut::<AssetServer>().unwrap();
+
         Self {
             none: materials.add(Color::NONE.into()),
             didi_sprite: materials.add(asset_server.load("didi.png").into()),
@@ -83,6 +93,10 @@ impl FromResources for GameplayMaterials {
             ice_cream_sprite: materials.add(asset_server.load("items/ice_cream.png").into()),
             water_glass_sprite: materials.add(asset_server.load("items/water_glass.png").into()),
             chips_sprite: materials.add(asset_server.load("items/chips.png").into()),
+            fridge_sprite: materials.add(asset_server.load("furniture/fridge.png").into()),
+            couch_sprite: materials.add(asset_server.load("furniture/couch.png").into()),
+            kitchen_sprite: materials.add(asset_server.load("furniture/kitchen.png").into()),
+            sink_sprite: materials.add(asset_server.load("furniture/sink.png").into()),
         }
     }
 }
@@ -113,7 +127,7 @@ fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMateria
     let collider = BoxCollider::new(75.0, 50.0);
 
     let didi_entity = commands
-        .spawn((Didi, position, collider.clone(), Movement::default()))
+        .spawn((Didi, position, collider, Movement::default()))
         .with_bundle(SpriteBundle {
             material: materials.didi_sprite.clone(),
             transform,
@@ -128,7 +142,6 @@ fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMateria
         .spawn((
             Baobei,
             Position(Vec3::new(1050.0, 235.0, 0.0)),
-            collider,
             TriggerArea::new(150.0, 150.0),
             AskingItem(asked_item),
         ))
@@ -159,41 +172,69 @@ fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMateria
     });
 }
 
+/// Spawn furniture in the.
+fn spawn_furniture(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+    commands
+        // Sink
+        .spawn(SpriteBundle {
+            material: materials.sink_sprite.clone(),
+            transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
+            ..SpriteBundle::default()
+        })
+        .with_bundle((
+            Position(Vec3::new(1050.0, 500.0, 0.0)),
+            BoxCollider::new(220.0, 20.0),
+        ))
+        // Kitchen
+        .spawn(SpriteBundle {
+            material: materials.kitchen_sprite.clone(),
+            transform: Transform::from_scale(Vec3::new(0.5, 0.5, 0.0)),
+            ..SpriteBundle::default()
+        })
+        .with_bundle((
+            Position(Vec3::new(300.0, 540.0, 0.0)),
+            BoxCollider::new(400.0, 100.0),
+        ))
+        // Fridge
+        .spawn(SpriteBundle {
+            material: materials.fridge_sprite.clone(),
+            transform: Transform::from_scale(Vec3::new(0.35, 0.35, 0.0)),
+            ..SpriteBundle::default()
+        })
+        .with_bundle((
+            Position(Vec3::new(720.0, 540.0, 0.0)),
+            BoxCollider::new(100.0, 100.0),
+        ))
+        // Couch
+        .spawn(SpriteBundle {
+            material: materials.couch_sprite.clone(),
+            transform: Transform::from_scale(Vec3::new(0.4, 0.4, 0.0)),
+            ..SpriteBundle::default()
+        })
+        .with_bundle((
+            Position(Vec3::new(1000.0, 150.0, 0.0)),
+            BoxCollider::new(300.0, 50.0),
+        ));
+}
+
 /// Spawn item producers.
-fn spawn_item_producers(commands: &mut Commands, materials: Res<GameplayMaterials>) {
-    let trigger_area = TriggerArea::new(175.0, 175.0);
-    let collider = BoxCollider::new(100.0, 100.0);
+fn spawn_item_producers(commands: &mut Commands) {
     commands
         .spawn((
             ItemProducer(Item::WaterGlass),
-            Position(Vec3::new(900.0, 600.0, 0.0)),
-            collider.clone(),
-            trigger_area.clone(),
+            Position(Vec3::new(1050.0, 500.0, 0.0)),
+            TriggerArea::new(230.0, 50.0),
         ))
-        .with_bundle(SpriteBundle {
-            material: materials.water_glass_sprite.clone(),
-            ..SpriteBundle::default()
-        })
         .spawn((
             ItemProducer(Item::Chips),
-            Position(Vec3::new(600.0, 600.0, 0.0)),
-            collider.clone(),
-            trigger_area.clone(),
+            Position(Vec3::new(210.0, 480.0, 0.0)),
+            TriggerArea::new(75.0, 75.0),
         ))
-        .with_bundle(SpriteBundle {
-            material: materials.chips_sprite.clone(),
-            ..SpriteBundle::default()
-        })
         .spawn((
             ItemProducer(Item::IceCream),
-            Position(Vec3::new(300.0, 600.0, 0.0)),
-            collider,
-            trigger_area,
-        ))
-        .with_bundle(SpriteBundle {
-            material: materials.ice_cream_sprite.clone(),
-            ..SpriteBundle::default()
-        });
+            Position(Vec3::new(720.0, 540.0, 0.0)),
+            TriggerArea::new(175.0, 175.0),
+        ));
 }
 
 /// Spawn boarders of the room, avoiding the user to go out of the screen.
@@ -204,7 +245,7 @@ fn spawn_boarders(commands: &mut Commands) {
     commands
         // Top
         .spawn((
-            Position(Vec3::new(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT - GAP, 0.0)),
+            Position(Vec3::new(WINDOW_WIDTH / 2.0, 510.0 + GAP, 0.0)),
             BoxCollider::new(WINDOW_WIDTH, GAP),
         ))
         // Bottom
