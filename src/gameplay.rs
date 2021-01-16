@@ -1,9 +1,6 @@
 //! Systems of the game phase
 
-use bevy::{
-    input::{keyboard::KeyboardInput, ElementState},
-    prelude::*,
-};
+use bevy::prelude::*;
 use rand::{distributions::Standard, prelude::Distribution, random, Rng};
 
 use crate::{
@@ -284,21 +281,9 @@ fn movement_system(
 }
 
 /// Goes back to the menu state when the player press `Escape`.
-fn back_to_menu_system(
-    mut keyboard_input_reader: Local<EventReader<KeyboardInput>>,
-    keyboard_input_events: Res<Events<KeyboardInput>>,
-    mut state: ResMut<State<GameState>>,
-) {
-    for event in keyboard_input_reader.iter(&keyboard_input_events) {
-        let escape_pressed = matches!(event, KeyboardInput {
-            key_code: Some(KeyCode::Escape),
-            state: ElementState::Pressed,
-            ..
-        });
-
-        if escape_pressed {
-            state.set_next(GameState::Menu).unwrap();
-        }
+fn back_to_menu_system(keyboard_input: Res<Input<KeyCode>>, mut state: ResMut<State<GameState>>) {
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        state.set_next(GameState::Menu).unwrap();
     }
 }
 

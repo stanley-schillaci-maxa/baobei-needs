@@ -140,20 +140,8 @@ fn cleanup_menu(commands: &mut Commands, menu_data: Res<MenuData>) {
 }
 
 /// Start the game play when the player press `Space`.
-fn play_on_space_system(
-    mut keyboard_input_reader: Local<EventReader<KeyboardInput>>,
-    keyboard_input_events: Res<Events<KeyboardInput>>,
-    mut state: ResMut<State<GameState>>,
-) {
-    for event in keyboard_input_reader.iter(&keyboard_input_events) {
-        let space_pressed = matches!(event, KeyboardInput {
-            key_code: Some(KeyCode::Space),
-            state: ElementState::Pressed,
-            ..
-        });
-
-        if space_pressed {
-            state.set_next(GameState::InGame).unwrap();
-        }
+fn play_on_space_system(keyboard_input: Res<Input<KeyCode>>, mut state: ResMut<State<GameState>>) {
+    if keyboard_input.just_pressed(KeyCode::Space) {
+        state.set_next(GameState::InGame).unwrap();
     }
 }

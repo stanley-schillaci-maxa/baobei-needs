@@ -298,29 +298,20 @@ fn update_collider_viewers_system(
 /// Refresh the position of collision viewers when the player presses `D`.
 fn refresh_collider_viewers_system(
     commands: &mut Commands,
-    mut keyboard_input_reader: Local<EventReader<KeyboardInput>>,
-    keyboard_input_events: Res<Events<KeyboardInput>>,
+    keyboard_input: Res<Input<KeyCode>>,
     all_viewers: Res<ColliderViewers>,
     collider_positions: Query<&Position, Without<Viewer>>,
     mut viewer_positions: Query<&mut Position, With<Viewer>>,
 ) {
-    for event in keyboard_input_reader.iter(&keyboard_input_events) {
-        let d_pressed = matches!(event, KeyboardInput {
-            key_code: Some(KeyCode::D),
-            state: ElementState::Pressed,
-            ..
-        });
-
-        if d_pressed {
-            for (collider, viewers) in &all_viewers.0 {
-                for viewer in viewers {
-                    if let Ok(pos) = collider_positions.get(*collider) {
-                        if let Ok(mut viewer_pos) = viewer_positions.get_mut(*viewer) {
-                            *viewer_pos = forwarded_position(pos);
-                        }
-                    } else {
-                        commands.despawn(*viewer);
+    if keyboard_input.just_pressed(KeyCode::D) {
+        for (collider, viewers) in &all_viewers.0 {
+            for viewer in viewers {
+                if let Ok(pos) = collider_positions.get(*collider) {
+                    if let Ok(mut viewer_pos) = viewer_positions.get_mut(*viewer) {
+                        *viewer_pos = forwarded_position(pos);
                     }
+                } else {
+                    commands.despawn(*viewer);
                 }
             }
         }
