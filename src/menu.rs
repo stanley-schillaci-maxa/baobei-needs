@@ -1,9 +1,6 @@
 //! Systems of the menu phase.
 
-use bevy::{
-    input::{keyboard::KeyboardInput, system::exit_on_esc_system, ElementState},
-    prelude::*,
-};
+use bevy::{input::system::exit_on_esc_system, prelude::*};
 
 use crate::constants::{GameState, STAGE};
 
