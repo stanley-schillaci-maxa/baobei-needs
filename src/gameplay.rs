@@ -122,8 +122,8 @@ fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMateria
     let position = Position(Vec3::new(640.0, 260.0, 0.0));
     let transform = Transform::from_scale(Vec3::new(0.3, 0.3, 0.0));
     let collider = BoxCollider {
-        size: Vec2::new(75.0, 75.0),
-        offset: Vec3::new(0.0, -25.0, 0.0),
+        size: Vec2::new(75.0, 50.0),
+        offset: Vec3::new(0.0, -10.0, 0.0),
     };
 
     let didi_entity = commands
@@ -183,7 +183,10 @@ fn spawn_furniture(commands: &mut Commands, materials: Res<GameplayMaterials>) {
         })
         .with_bundle((
             Position(Vec3::new(1050.0, 500.0, 0.0)),
-            BoxCollider::new(220.0, 20.0),
+            BoxCollider {
+                size: Vec2::new(220.0, 40.0),
+                offset: Vec3::new(0.0, 10.0, 0.0),
+            },
         ))
         // Kitchen
         .spawn(SpriteBundle {
@@ -213,7 +216,10 @@ fn spawn_furniture(commands: &mut Commands, materials: Res<GameplayMaterials>) {
         })
         .with_bundle((
             Position(Vec3::new(1000.0, 150.0, 0.0)),
-            BoxCollider::new(300.0, 25.0),
+            BoxCollider {
+                size: Vec2::new(300.0, 40.0),
+                offset: Vec3::new(10.0, 15.0, 0.0),
+            },
         ));
 }
 
