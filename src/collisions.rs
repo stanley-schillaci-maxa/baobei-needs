@@ -7,11 +7,7 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-use bevy::{
-    input::{keyboard::KeyboardInput, ElementState},
-    prelude::*,
-    sprite::collide_aabb::collide,
-};
+use bevy::{prelude::*, sprite::collide_aabb::collide};
 
 use crate::constants::{GameState, STAGE};
 
@@ -61,13 +57,16 @@ pub struct Movement(pub Vec3);
 pub struct BoxCollider {
     /// The width and height of the box.
     pub size: Vec2,
+    /// Offset of the collider with the position.
+    pub offset: Vec3,
 }
 
 impl BoxCollider {
-    /// Creates a box collider with the given size.
+    /// Creates a box collider with the given size and no offset.
     pub fn new(width: f32, height: f32) -> Self {
         Self {
             size: Vec2::new(width, height),
+            offset: Vec3::new(0.0, 0.0, 0.0),
         }
     }
 }
@@ -131,9 +130,15 @@ pub fn collision_system(
     for (mut pos_a, col_a, mut mov_a) in moving_colliders.iter_mut() {
         let next_pos_a = pos_a.0 + mov_a.0;
 
-        let no_collision = other_colliders
-            .iter()
-            .all(|(pos_b, col_b)| collide(next_pos_a, col_a.size, pos_b.0, col_b.size).is_none());
+        let no_collision = other_colliders.iter().all(|(pos_b, col_b)| {
+            collide(
+                next_pos_a + col_a.offset,
+                col_a.size,
+                pos_b.0 + col_b.offset,
+                col_b.size,
+            )
+            .is_none()
+        });
 
         if no_collision {
             pos_a.0 = next_pos_a;
@@ -224,7 +229,7 @@ fn add_collider_viewer_system(
 
         let viewer = spawn_viewer(
             commands,
-            forwarded_position(pos),
+            forwarded_position(pos.0 + collider.offset),
             collider.size,
             materials.collider.clone(),
         );
@@ -240,7 +245,7 @@ fn add_collider_viewer_system(
 
         let viewer = spawn_viewer(
             commands,
-            forwarded_position(pos),
+            forwarded_position(pos.0),
             trigger_area.size,
             materials.trigger_area.clone(),
         );
@@ -282,13 +287,19 @@ type MovedCollider = (
 fn update_collider_viewers_system(
     all_viewers: Res<ColliderViewers>,
     moved_colliders: Query<(Entity, &Position), MovedCollider>,
+    box_colliders: Query<&BoxCollider>,
     mut viewer_query: Query<&mut Position, With<Viewer>>,
 ) {
     for (entity, pos) in moved_colliders.iter() {
         if let Some(viewers) = all_viewers.0.get(&entity) {
             for viewer in viewers {
                 if let Ok(mut viewer_pos) = viewer_query.get_mut(*viewer) {
-                    *viewer_pos = forwarded_position(pos);
+                    let offset = box_colliders
+                        .get(entity)
+                        .map(|col| col.offset)
+                        .unwrap_or_default();
+
+                    *viewer_pos = forwarded_position(pos.0 + offset);
                 }
             }
         }
@@ -302,13 +313,19 @@ fn refresh_collider_viewers_system(
     all_viewers: Res<ColliderViewers>,
     collider_positions: Query<&Position, Without<Viewer>>,
     mut viewer_positions: Query<&mut Position, With<Viewer>>,
+    box_colliders: Query<&BoxCollider>,
 ) {
     if keyboard_input.just_pressed(KeyCode::D) {
         for (collider, viewers) in &all_viewers.0 {
             for viewer in viewers {
                 if let Ok(pos) = collider_positions.get(*collider) {
                     if let Ok(mut viewer_pos) = viewer_positions.get_mut(*viewer) {
-                        *viewer_pos = forwarded_position(pos);
+                        let offset = box_colliders
+                            .get(*collider)
+                            .map(|col| col.offset)
+                            .unwrap_or_default();
+
+                        *viewer_pos = forwarded_position(pos.0 + offset);
                     }
                 } else {
                     commands.despawn(*viewer);
@@ -318,10 +335,10 @@ fn refresh_collider_viewers_system(
     }
 }
 
-/// Returns a copy of the given position placed a little bit forward.
-fn forwarded_position(pos: &Position) -> Position {
-    let mut new_pos = Position(pos.0);
-    new_pos.0.y = pos.0.y - 1.0;
+/// Returns a the given position placed a little bit forward.
+fn forwarded_position(pos: Vec3) -> Position {
+    let mut new_pos = Position(pos);
+    new_pos.0.y = pos.y - 1.0;
     new_pos.0.z = 0.0; // ignore the z position of the entity when colliding it
     new_pos
 }

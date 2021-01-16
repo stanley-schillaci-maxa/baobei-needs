@@ -121,7 +121,10 @@ fn setup_camera(commands: &mut Commands) {
 fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMaterials>) {
     let position = Position(Vec3::new(640.0, 260.0, 0.0));
     let transform = Transform::from_scale(Vec3::new(0.3, 0.3, 0.0));
-    let collider = BoxCollider::new(75.0, 50.0);
+    let collider = BoxCollider {
+        size: Vec2::new(75.0, 75.0),
+        offset: Vec3::new(0.0, -25.0, 0.0),
+    };
 
     let didi_entity = commands
         .spawn((Didi, position, collider, Movement::default()))
