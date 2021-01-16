@@ -1,8 +1,8 @@
 [hooks]
 pre-commit = """\
+  cargo fix --allow-staged --allow-dirty ;\
   cargo fmt -- --check ;\
   cargo fmt ;\
-  cargo fix --allow-staged --allow-dirty ;\
   cargo clippy ;\
 """
 
