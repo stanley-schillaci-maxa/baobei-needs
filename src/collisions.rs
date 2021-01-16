@@ -210,7 +210,7 @@ struct ViewedCollider;
 struct ViewedTriggerArea;
 
 /// Component tagging an entity as a collider viewer
-struct Viewer;
+struct DebugViewer;
 
 /// Stores a map of collider viewers: `{ entity_with_collider => viewer_entities }`
 #[derive(Default)]
@@ -266,7 +266,7 @@ fn spawn_viewer(
     color: Handle<ColorMaterial>,
 ) -> Entity {
     commands
-        .spawn((Viewer, pos))
+        .spawn((DebugViewer, pos))
         .with_bundle(SpriteBundle {
             material: color,
             sprite: Sprite::new(size),
@@ -279,7 +279,7 @@ fn spawn_viewer(
 /// Query filter of a entity with a moved collider.
 type MovedCollider = (
     Changed<Position>,
-    Without<Viewer>,
+    Without<DebugViewer>,
     Or<(With<ViewedCollider>, With<ViewedTriggerArea>)>,
 );
 
@@ -288,7 +288,7 @@ fn update_collider_viewers_system(
     all_viewers: Res<ColliderViewers>,
     moved_colliders: Query<(Entity, &Position), MovedCollider>,
     box_colliders: Query<&BoxCollider>,
-    mut viewer_query: Query<&mut Position, With<Viewer>>,
+    mut viewer_query: Query<&mut Position, With<DebugViewer>>,
 ) {
     for (entity, pos) in moved_colliders.iter() {
         if let Some(viewers) = all_viewers.0.get(&entity) {
@@ -311,8 +311,8 @@ fn refresh_collider_viewers_system(
     commands: &mut Commands,
     keyboard_input: Res<Input<KeyCode>>,
     all_viewers: Res<ColliderViewers>,
-    collider_positions: Query<&Position, Without<Viewer>>,
-    mut viewer_positions: Query<&mut Position, With<Viewer>>,
+    collider_positions: Query<&Position, Without<DebugViewer>>,
+    mut viewer_positions: Query<&mut Position, With<DebugViewer>>,
     box_colliders: Query<&BoxCollider>,
 ) {
     if keyboard_input.just_pressed(KeyCode::D) {
