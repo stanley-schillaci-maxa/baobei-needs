@@ -250,17 +250,21 @@ fn spawn_boarders(commands: &mut Commands) {
         ))
         // Bottom
         .spawn((
-            Position(Vec3::new(WINDOW_WIDTH / 2.0, GAP, 0.0)),
+            Position(Vec3::new(WINDOW_WIDTH / 2.0, GAP / 2.0, 0.0)),
             BoxCollider::new(WINDOW_WIDTH, GAP),
         ))
         // Left
         .spawn((
-            Position(Vec3::new(GAP, WINDOW_HEIGHT / 2.0, 0.0)),
+            Position(Vec3::new(GAP / 2.0, WINDOW_HEIGHT / 2.0, 0.0)),
             BoxCollider::new(GAP, WINDOW_HEIGHT),
         ))
         // Right
         .spawn((
-            Position(Vec3::new(WINDOW_WIDTH - GAP, WINDOW_HEIGHT / 2.0, 0.0)),
+            Position(Vec3::new(
+                WINDOW_WIDTH - GAP / 2.0,
+                WINDOW_HEIGHT / 2.0,
+                0.0,
+            )),
             BoxCollider::new(GAP, WINDOW_HEIGHT),
         ));
 }
