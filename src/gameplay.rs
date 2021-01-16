@@ -76,6 +76,8 @@ struct GameplayMaterials {
     kitchen_sprite: Handle<ColorMaterial>,
     /// Sprite for the sink
     sink_sprite: Handle<ColorMaterial>,
+    /// Sprite for the table
+    table_sprite: Handle<ColorMaterial>,
 }
 
 impl FromResources for GameplayMaterials {
@@ -94,6 +96,7 @@ impl FromResources for GameplayMaterials {
             couch_sprite: materials.add(asset_server.load("furniture/couch.png").into()),
             kitchen_sprite: materials.add(asset_server.load("furniture/kitchen.png").into()),
             sink_sprite: materials.add(asset_server.load("furniture/sink.png").into()),
+            table_sprite: materials.add(asset_server.load("furniture/table.png").into()),
         }
     }
 }
@@ -219,6 +222,19 @@ fn spawn_furniture(commands: &mut Commands, materials: Res<GameplayMaterials>) {
             BoxCollider {
                 size: Vec2::new(300.0, 40.0),
                 offset: Vec3::new(10.0, 15.0, 0.0),
+            },
+        ))
+        // Table
+        .spawn(SpriteBundle {
+            material: materials.table_sprite.clone(),
+            transform: Transform::from_scale(Vec3::new(0.4, 0.4, 0.0)),
+            ..SpriteBundle::default()
+        })
+        .with_bundle((
+            Position(Vec3::new(300.0, 200.0, 0.0)),
+            BoxCollider {
+                size: Vec2::new(300.0, 40.0),
+                offset: Vec3::new(0.0, 25.0, 0.0),
             },
         ));
 }
