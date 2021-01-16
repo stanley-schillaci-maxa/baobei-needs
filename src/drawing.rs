@@ -22,8 +22,14 @@ fn drawing_position_system(mut query: Query<(&Position, &mut Transform), Without
 
 /// Updates position of the sprite with the position of the entity
 pub fn update_drawing_position(position: &Position, transform: &mut Transform) {
+    /// Limit position in which the displayed sprite is still visible.
+    const Z_LIMIT: f32 = 1000.0;
+
     transform.translation = position.0;
 
     // Scale the z index between 0 and 1000 depending on the y index.
-    transform.translation.z = 1000.0 - position.0.y * 1000.0 / WINDOW_HEIGHT;
+    transform.translation.z = Z_LIMIT - position.0.y * Z_LIMIT / WINDOW_HEIGHT;
+
+    // Move up the entities in the air.
+    transform.translation.y += position.0.z;
 }

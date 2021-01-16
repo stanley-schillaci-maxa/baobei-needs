@@ -141,7 +141,7 @@ fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMateria
     let baobei_entity = commands
         .spawn((
             Baobei,
-            Position(Vec3::new(1050.0, 235.0, 0.0)),
+            Position(Vec3::new(1050.0, 150.0, 85.0)),
             TriggerArea::new(150.0, 150.0),
             AskingItem(asked_item),
         ))
@@ -213,7 +213,7 @@ fn spawn_furniture(commands: &mut Commands, materials: Res<GameplayMaterials>) {
         })
         .with_bundle((
             Position(Vec3::new(1000.0, 150.0, 0.0)),
-            BoxCollider::new(300.0, 50.0),
+            BoxCollider::new(300.0, 25.0),
         ));
 }
 

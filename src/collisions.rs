@@ -331,5 +331,6 @@ fn refresh_collider_viewers_system(
 fn forwarded_position(pos: &Position) -> Position {
     let mut new_pos = Position(pos.0);
     new_pos.0.y = pos.0.y - 1.0;
+    new_pos.0.z = 0.0; // ignore the z position of the entity when colliding it
     new_pos
 }
