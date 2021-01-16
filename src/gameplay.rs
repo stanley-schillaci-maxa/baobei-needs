@@ -26,6 +26,7 @@ impl Plugin for GameplayPlugin {
             .add_startup_system(setup_camera.system())
             .add_startup_system(spawn_didi_and_baobei.system())
             .add_startup_system(spawn_item_producers.system())
+            .add_startup_system(spawn_boarders.system())
             .add_resource(PickAndDropCooldown(Cooldown::from_seconds(0.2)))
             .on_state_update(STAGE, GameState::InGame, back_to_menu_system.system())
             .on_state_update(STAGE, GameState::InGame, movement_system.system())
@@ -193,6 +194,34 @@ fn spawn_item_producers(commands: &mut Commands, materials: Res<GameplayMaterial
             material: materials.ice_cream_sprite.clone(),
             ..SpriteBundle::default()
         });
+}
+
+/// Spawn boarders of the room, avoiding the user to go out of the screen.
+fn spawn_boarders(commands: &mut Commands) {
+    /// Gap between the screen limit and the available space.
+    const GAP: f32 = 50.0;
+
+    commands
+        // Top
+        .spawn((
+            Position(Vec3::new(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT - GAP, 0.0)),
+            BoxCollider::new(WINDOW_WIDTH, GAP),
+        ))
+        // Bottom
+        .spawn((
+            Position(Vec3::new(WINDOW_WIDTH / 2.0, GAP, 0.0)),
+            BoxCollider::new(WINDOW_WIDTH, GAP),
+        ))
+        // Left
+        .spawn((
+            Position(Vec3::new(GAP, WINDOW_HEIGHT / 2.0, 0.0)),
+            BoxCollider::new(GAP, WINDOW_HEIGHT),
+        ))
+        // Right
+        .spawn((
+            Position(Vec3::new(WINDOW_WIDTH - GAP, WINDOW_HEIGHT / 2.0, 0.0)),
+            BoxCollider::new(GAP, WINDOW_HEIGHT),
+        ));
 }
 
 /// Moves Didi toward the direction sent by controllers.
