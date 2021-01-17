@@ -11,12 +11,12 @@ use crate::{
 
 use super::{BoxCollider, Position, TriggerArea};
 
-/// Plugin managing contact collisions
+/// Plugin for displaying colliders and trigger areas.
 pub struct DebugCollisionPlugin;
 
 impl Plugin for DebugCollisionPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.init_resource::<CollisionMaterials>()
+        app.init_resource::<ColliderMaterials>()
             .init_resource::<ColliderViewers>()
             .on_state_update(
                 STAGE,
@@ -36,20 +36,20 @@ impl Plugin for DebugCollisionPlugin {
     }
 }
 
-/// Colors of the button.
-struct CollisionMaterials {
+/// Colors of the colliders.
+struct ColliderMaterials {
     /// Debug color for the `BoxCollider`
     collider: Handle<ColorMaterial>,
     /// Debug color for the `TriggerArea`
     trigger_area: Handle<ColorMaterial>,
 }
 
-impl FromResources for CollisionMaterials {
+impl FromResources for ColliderMaterials {
     fn from_resources(resources: &Resources) -> Self {
         let mut materials = resources.get_mut::<Assets<ColorMaterial>>().unwrap();
         Self {
-            collider: materials.add(Color::rgba(0.3, 1.0, 0.3, 0.3).into()),
-            trigger_area: materials.add(Color::rgba(0.3, 0.3, 1.0, 0.3).into()),
+            collider: materials.add(Color::rgba(0.3, 1.0, 0.3, 0.25).into()),
+            trigger_area: materials.add(Color::rgba(0.3, 0.3, 1.0, 0.25).into()),
         }
     }
 }
@@ -70,7 +70,7 @@ struct ColliderViewers(HashMap<Entity, Vec<Entity>>);
 fn add_collider_viewer_system(
     commands: &mut Commands,
     mut viewers: ResMut<ColliderViewers>,
-    materials: ResMut<CollisionMaterials>,
+    materials: ResMut<ColliderMaterials>,
     non_viewed_colliders: Query<(Entity, &BoxCollider, &Position), Without<ViewedCollider>>,
     non_viewed_trigger_areas: Query<(Entity, &TriggerArea, &Position), Without<ViewedTriggerArea>>,
 ) {
