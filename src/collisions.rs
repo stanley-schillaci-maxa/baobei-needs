@@ -9,7 +9,10 @@ use std::{
 
 use bevy::{prelude::*, sprite::collide_aabb::collide};
 
-use crate::constants::{GameState, STAGE};
+use crate::{
+    constants::{GameState, STAGE},
+    drawing::UIObject,
+};
 
 /// Plugin managing contact collisions
 pub struct CollisionPlugin;
@@ -266,7 +269,7 @@ fn spawn_viewer(
     color: Handle<ColorMaterial>,
 ) -> Entity {
     commands
-        .spawn((DebugViewer, pos))
+        .spawn((DebugViewer, pos, UIObject))
         .with_bundle(SpriteBundle {
             material: color,
             sprite: Sprite::new(size),
