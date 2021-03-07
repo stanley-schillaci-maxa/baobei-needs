@@ -7,7 +7,8 @@ use crate::{constants::GameState, cooldown::Cooldown};
 
 use self::{
     entities::{
-        setup_camera, spawn_boarders, spawn_didi_and_baobei, spawn_furniture, spawn_item_producers,
+        setup_camera, spawn_background, spawn_boarders, spawn_didi_and_baobei, spawn_furniture,
+        spawn_happiness_bar, spawn_item_producers,
     },
     items::{handle_actions_system, pick_or_drop_system, ActionEvent, PickAndDropCooldown},
     materials::GameplayMaterials,
@@ -30,6 +31,7 @@ impl Plugin for GameplayPlugin {
             .register_type::<Furniture>()
             .register_type::<Baobei>()
             .add_startup_system(setup_camera.system())
+            .add_startup_system(spawn_background.system())
             .add_startup_system(spawn_furniture.system())
             .add_startup_system(spawn_didi_and_baobei.system())
             .add_startup_system(spawn_item_producers.system())

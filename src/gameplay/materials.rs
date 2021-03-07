@@ -8,6 +8,8 @@ use super::items::Item;
 pub struct GameplayMaterials {
     /// Transparent color
     pub none: Handle<ColorMaterial>,
+    /// Sprite of the background image
+    pub background_sprite: Handle<ColorMaterial>,
     /// Sprite of didi
     pub didi_sprite: Handle<ColorMaterial>,
     /// Sprite of baobei
@@ -38,6 +40,7 @@ impl FromResources for GameplayMaterials {
         Self {
             none: materials.add(Color::NONE.into()),
             didi_sprite: materials.add(asset_server.load("didi.png").into()),
+            background_sprite: materials.add(asset_server.load("background.png").into()),
             baobei_sprite: materials.add(asset_server.load("baobei.png").into()),
             ice_cream_sprite: materials.add(asset_server.load("items/ice_cream.png").into()),
             water_glass_sprite: materials.add(asset_server.load("items/water_glass.png").into()),

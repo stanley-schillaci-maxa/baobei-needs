@@ -30,6 +30,15 @@ pub fn setup_camera(commands: &mut Commands) {
     commands.spawn(camera_2d);
 }
 
+/// Spawn the background of the screen.
+pub fn spawn_background(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+    commands.spawn(SpriteBundle {
+        material: materials.background_sprite.clone(),
+        transform: Transform::from_translation(Vec3::new(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT / 2.0, 0.0)),
+        ..SpriteBundle::default()
+    });
+}
+
 /// Spawn the entity for Didi, the player and Baobei.
 pub fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMaterials>) {
     let position = Position(Vec3::new(640.0, 260.0, 0.0));
