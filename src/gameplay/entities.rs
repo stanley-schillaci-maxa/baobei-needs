@@ -9,10 +9,25 @@ use crate::{
 };
 
 use super::{
+    happiness::Happiness,
     items::{AskedItem, AskingItem, Item, ItemProducer},
     materials::GameplayMaterials,
     Baobei, Didi,
 };
+
+/// Plugin that spawns main entities of the game.
+pub struct SpawnEntitiesPlugin;
+
+impl Plugin for SpawnEntitiesPlugin {
+    fn build(&self, app: &mut AppBuilder) {
+        app.add_startup_system(setup_camera.system())
+            .add_startup_system(spawn_background.system())
+            .add_startup_system(spawn_furniture.system())
+            .add_startup_system(spawn_didi_and_baobei.system())
+            .add_startup_system(spawn_item_producers.system())
+            .add_startup_system(spawn_boarders.system());
+    }
+}
 
 /// Stores entities in the gameplay phase
 pub struct GameData {
@@ -23,7 +38,7 @@ pub struct GameData {
 }
 
 /// Spawn the camera.
-pub fn setup_camera(commands: &mut Commands) {
+fn setup_camera(commands: &mut Commands) {
     let mut camera_2d = Camera2dBundle::default();
     camera_2d.transform.translation += Vec3::new(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT / 2.0, 0.0);
 
@@ -31,7 +46,7 @@ pub fn setup_camera(commands: &mut Commands) {
 }
 
 /// Spawn the background of the screen.
-pub fn spawn_background(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+fn spawn_background(commands: &mut Commands, materials: Res<GameplayMaterials>) {
     commands.spawn(SpriteBundle {
         material: materials.background_sprite.clone(),
         transform: Transform::from_translation(Vec3::new(
@@ -44,7 +59,7 @@ pub fn spawn_background(commands: &mut Commands, materials: Res<GameplayMaterial
 }
 
 /// Spawn the entity for Didi, the player and Baobei.
-pub fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMaterials>) {
     let position = Position(Vec3::new(640.0, 260.0, 0.0));
     let transform = Transform::from_scale(Vec3::new(0.3, 0.3, 0.0));
     let collider = BoxCollider {
@@ -70,6 +85,7 @@ pub fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMat
             Position(Vec3::new(1050.0, 150.0, 85.0)),
             TriggerArea::new(150.0, 150.0),
             AskingItem(asked_item),
+            Happiness::happy(),
         ))
         .with_bundle(SpriteBundle {
             material: materials.baobei_sprite.clone(),
@@ -99,7 +115,7 @@ pub fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMat
 }
 
 /// Spawn furniture in the.
-pub fn spawn_furniture(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+fn spawn_furniture(commands: &mut Commands, materials: Res<GameplayMaterials>) {
     commands
         // Sink
         .spawn(SpriteBundle {
@@ -163,7 +179,7 @@ pub fn spawn_furniture(commands: &mut Commands, materials: Res<GameplayMaterials
 }
 
 /// Spawn item producers.
-pub fn spawn_item_producers(commands: &mut Commands) {
+fn spawn_item_producers(commands: &mut Commands) {
     commands
         .spawn((
             ItemProducer(Item::WaterGlass),
@@ -183,7 +199,7 @@ pub fn spawn_item_producers(commands: &mut Commands) {
 }
 
 /// Spawn boarders of the room, avoiding the user to go out of the screen.
-pub fn spawn_boarders(commands: &mut Commands) {
+fn spawn_boarders(commands: &mut Commands) {
     /// Gap between the screen limit and the available space.
     const GAP: f32 = 50.0;
 

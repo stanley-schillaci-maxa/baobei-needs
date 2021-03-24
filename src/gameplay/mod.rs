@@ -6,10 +6,7 @@ use crate::constants::STAGE;
 use crate::{constants::GameState, cooldown::Cooldown};
 
 use self::{
-    entities::{
-        setup_camera, spawn_background, spawn_boarders, spawn_didi_and_baobei, spawn_furniture,
-        spawn_happiness_bar, spawn_item_producers,
-    },
+    entities::SpawnEntitiesPlugin,
     items::{handle_actions_system, pick_or_drop_system, ActionEvent, PickAndDropCooldown},
     materials::GameplayMaterials,
     movement::movement_system,
@@ -30,12 +27,7 @@ impl Plugin for GameplayPlugin {
             .register_type::<Didi>()
             .register_type::<Furniture>()
             .register_type::<Baobei>()
-            .add_startup_system(setup_camera.system())
-            .add_startup_system(spawn_background.system())
-            .add_startup_system(spawn_furniture.system())
-            .add_startup_system(spawn_didi_and_baobei.system())
-            .add_startup_system(spawn_item_producers.system())
-            .add_startup_system(spawn_boarders.system())
+            .add_plugin(SpawnEntitiesPlugin)
             .add_resource(PickAndDropCooldown(Cooldown::from_seconds(0.2)))
             .on_state_update(STAGE, GameState::InGame, back_to_menu_system.system())
             .on_state_update(STAGE, GameState::InGame, movement_system.system())
