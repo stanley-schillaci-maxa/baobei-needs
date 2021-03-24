@@ -17,7 +17,7 @@ impl Plugin for ControllerPlugin {
 
 /// An event triggered when a controller choose a direction.
 pub struct DirectionEvent {
-    /// Direction vector between 0 and 1
+    /// Direction vector normalized to length 1.
     pub direction: Vec3,
 }
 
@@ -42,6 +42,7 @@ fn keyboard_system(
     }
 
     if direction != Vec3::zero() {
+        let direction = direction.normalize();
         direction_events.send(DirectionEvent { direction })
     }
 }
@@ -89,7 +90,7 @@ fn gamepad_system(
 
         if left_stick_x != 0.0 && left_stick_y != 0.0 {
             direction_events.send(DirectionEvent {
-                direction: Vec3::new(left_stick_x, left_stick_y, 0.0),
+                direction: Vec3::new(left_stick_x, left_stick_y, 0.0).normalize(),
             })
         }
     }
