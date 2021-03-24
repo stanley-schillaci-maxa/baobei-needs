@@ -44,6 +44,7 @@ fn main() {
             title: "Baobei needs".to_string(),
             width: WINDOW_WIDTH,
             height: WINDOW_HEIGHT,
+            resizable: false,
             ..WindowDescriptor::default()
         })
         .add_resource(State::new(GameState::Menu))
