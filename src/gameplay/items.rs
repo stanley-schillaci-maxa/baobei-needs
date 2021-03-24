@@ -165,7 +165,7 @@ pub fn handle_actions_system(
     game_data: Res<GameData>,
     materials: Res<GameplayMaterials>,
     carried_items: Query<Entity, With<CarriedItem>>,
-    mut asking_items: Query<&mut AskingItem, With<Baobei>>,
+    mut baobei_query: Query<(&mut AskingItem, &mut Happiness), With<Baobei>>,
     mut asked_item_materials: Query<&mut Handle<ColorMaterial>, With<AskedItem>>,
     positions: Query<&Position>,
     mut transforms: Query<&mut Transform>,
@@ -247,8 +247,9 @@ pub fn handle_actions_system(
                 }
 
                 let next_item = random_different_item(*item);
-                for mut asking_item in asking_items.iter_mut() {
-                    asking_item.0 = next_item
+                for (mut asking_item, mut happiness) in baobei_query.iter_mut() {
+                    asking_item.0 = next_item;
+                    happiness.add(0.15);
                 }
                 for mut item_material in asked_item_materials.iter_mut() {
                     *item_material = materials.item_sprite_for(next_item);

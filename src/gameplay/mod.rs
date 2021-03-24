@@ -6,11 +6,12 @@ use crate::constants::GameState;
 use crate::constants::STAGE;
 
 use self::{
-    entities::SpawnEntitiesPlugin, items::ItemsPlugin, materials::GameplayMaterials,
-    movement::movement_system,
+    entities::SpawnEntitiesPlugin, happiness::HappinessPlugin, items::ItemsPlugin,
+    materials::GameplayMaterials, movement::movement_system,
 };
 
 mod entities;
+mod happiness;
 mod items;
 mod materials;
 mod movement;
@@ -27,7 +28,8 @@ impl Plugin for GameplayPlugin {
             .add_plugin(SpawnEntitiesPlugin)
             .on_state_update(STAGE, GameState::InGame, back_to_menu_system.system())
             .on_state_update(STAGE, GameState::InGame, movement_system.system())
-            .add_plugin(ItemsPlugin);
+            .add_plugin(ItemsPlugin)
+            .add_plugin(HappinessPlugin);
     }
 }
 
