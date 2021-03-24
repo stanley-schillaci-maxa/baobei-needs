@@ -3,11 +3,24 @@
 use bevy::prelude::*;
 use rand::{distributions::Standard, prelude::Distribution, random, Rng};
 
-use super::{entities::GameData, materials::GameplayMaterials, Baobei, Didi};
+use super::{entities::GameData, happiness::Happiness, materials::GameplayMaterials, Baobei, Didi};
 use crate::{
     collisions::{Contact, Position, TriggerArea},
+    constants::{GameState, STAGE},
     cooldown::Cooldown,
 };
+
+/// Plugin managing items and actions.
+pub struct ItemsPlugin;
+
+impl Plugin for ItemsPlugin {
+    fn build(&self, app: &mut AppBuilder) {
+        app.add_event::<ActionEvent>()
+            .add_resource(PickAndDropCooldown(Cooldown::from_seconds(0.2)))
+            .on_state_update(STAGE, GameState::InGame, pick_or_drop_system.system())
+            .on_state_update(STAGE, GameState::InGame, handle_actions_system.system());
+    }
+}
 
 /// An items that can be produced, carried and received.
 #[derive(Debug, Clone, Copy, PartialEq)]
