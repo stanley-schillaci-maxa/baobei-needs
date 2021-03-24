@@ -30,12 +30,16 @@ pub struct GameplayMaterials {
     pub sink_sprite: Handle<ColorMaterial>,
     /// Sprite for the table
     pub table_sprite: Handle<ColorMaterial>,
+    /// Texture atlas for emotions sprites
+    pub emotion_atlas: Handle<TextureAtlas>,
 }
 
 impl FromResources for GameplayMaterials {
     fn from_resources(resources: &Resources) -> Self {
-        let mut materials = resources.get_mut::<Assets<ColorMaterial>>().unwrap();
         let asset_server = resources.get_mut::<AssetServer>().unwrap();
+
+        let mut materials = resources.get_mut::<Assets<ColorMaterial>>().unwrap();
+        let mut texture_atlases = resources.get_mut::<Assets<TextureAtlas>>().unwrap();
 
         Self {
             none: materials.add(Color::NONE.into()),
@@ -50,6 +54,12 @@ impl FromResources for GameplayMaterials {
             kitchen_sprite: materials.add(asset_server.load("furniture/kitchen.png").into()),
             sink_sprite: materials.add(asset_server.load("furniture/sink.png").into()),
             table_sprite: materials.add(asset_server.load("furniture/table.png").into()),
+            emotion_atlas: texture_atlases.add(TextureAtlas::from_grid(
+                asset_server.load("emotions.png"),
+                Vec2::new(152.0, 152.0),
+                5,
+                1,
+            )),
         }
     }
 }
