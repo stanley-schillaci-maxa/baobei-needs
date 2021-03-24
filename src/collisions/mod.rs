@@ -109,27 +109,34 @@ pub enum ContactEvent {
 }
 
 /// Moves the position of moving entities depending on their movement.
-/// If the entity collides with another collider, then it will be stopped.
+/// If the entity collides with another collider, then the movement will not be made.
+///
+/// The collision is checked for both the X and Y axises, and in case of
+/// diagonal movement, one axis can still be moved.
 pub fn collision_system(
     mut moving_colliders: Query<(&mut Position, &BoxCollider, &mut Movement)>,
     other_colliders: Query<(&Position, &BoxCollider), Without<Movement>>,
 ) {
     for (mut pos_a, col_a, mut mov_a) in moving_colliders.iter_mut() {
-        let next_pos_a = pos_a.0 + mov_a.0;
+        let will_not_collide = |next_pos_a: Vec3| {
+            other_colliders.iter().all(|(pos_b, col_b)| {
+                collide(
+                    next_pos_a + col_a.offset,
+                    col_a.size,
+                    pos_b.0 + col_b.offset,
+                    col_b.size,
+                )
+                .is_none()
+            })
+        };
 
-        let no_collision = other_colliders.iter().all(|(pos_b, col_b)| {
-            collide(
-                next_pos_a + col_a.offset,
-                col_a.size,
-                pos_b.0 + col_b.offset,
-                col_b.size,
-            )
-            .is_none()
-        });
-
-        if no_collision {
-            pos_a.0 = next_pos_a;
+        if will_not_collide(pos_a.0 + mov_a.0 * Vec3::unit_x()) {
+            pos_a.0.x += mov_a.0.x;
         }
+        if will_not_collide(pos_a.0 + mov_a.0 * Vec3::unit_y()) {
+            pos_a.0.y += mov_a.0.y;
+        }
+
         *mov_a = Movement::default();
     }
 }
