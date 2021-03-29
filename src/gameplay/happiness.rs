@@ -51,7 +51,7 @@ impl Happiness {
     }
 
     /// Subtracts the given value and clamps the result between 0 and 1
-    fn sub(&mut self, value: f32) {
+    pub fn sub(&mut self, value: f32) {
         self.add(-value)
     }
 }

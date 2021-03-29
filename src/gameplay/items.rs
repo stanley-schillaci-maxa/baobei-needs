@@ -118,20 +118,16 @@ pub fn pick_or_drop_system(
     }
 
     // Give an item to baobei
-    contacts
-        .iter()
-        .filter(|contact| contact.0 == didi)
-        .filter_map(|contact| item_askers.get(contact.1).ok())
-        .for_each(|AskingItem(asked_item)| {
-            match carried_item {
-                Ok(Carrying(item)) if (item == asked_item) => {
-                    action_events.send(ActionEvent::Give(*item))
-                }
-                Ok(Carrying(item)) => action_events.send(ActionEvent::Keep(*item)),
-                _ => {}
-            }
-            cooldown.0.start();
-        });
+    if let Ok(Carrying(item)) = carried_item {
+        contacts
+            .iter()
+            .filter(|contact| contact.0 == didi)
+            .filter_map(|contact| item_askers.get(contact.1).ok())
+            .for_each(|_| {
+                action_events.send(ActionEvent::Give(*item));
+                cooldown.0.start();
+            });
+    }
 
     if !cooldown.0.available() {
         return; // Avoid to do more than one action at once.
@@ -240,19 +236,26 @@ pub fn handle_actions_system(
             ActionEvent::Keep(item) => info!("Keep item {:?}", item),
             ActionEvent::Give(item) => {
                 info!("Give item {:?}", item);
-
-                commands.remove_one::<Carrying>(didi);
-                for item_in_hand in carried_items.iter() {
-                    commands.despawn(item_in_hand);
-                }
-
-                let next_item = random_different_item(*item);
                 for (mut asking_item, mut happiness) in baobei_query.iter_mut() {
-                    asking_item.0 = next_item;
+                    if asking_item.0 != *item {
+                        happiness.sub(0.15);
+                        return;
+                    }
+
                     happiness.add(0.15);
-                }
-                for mut item_material in asked_item_materials.iter_mut() {
-                    *item_material = materials.item_sprite_for(next_item);
+
+                    // Remove item
+                    commands.remove_one::<Carrying>(didi);
+                    for item_in_hand in carried_items.iter() {
+                        commands.despawn(item_in_hand);
+                    }
+
+                    // Add another item
+                    let next_item = random_different_item(*item);
+                    for mut item_material in asked_item_materials.iter_mut() {
+                        *item_material = materials.item_sprite_for(next_item);
+                    }
+                    asking_item.0 = next_item;
                 }
             }
         }
