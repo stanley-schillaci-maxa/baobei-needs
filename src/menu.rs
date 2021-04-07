@@ -73,6 +73,8 @@ fn setup_menu(
     asset_server: Res<AssetServer>,
     materials: Res<MenuMaterials>,
 ) {
+    commands.spawn().insert_bundle(UiCameraBundle::default());
+
     let font = asset_server.load("FiraSans-Bold.ttf");
 
     let node_wrapper = commands
