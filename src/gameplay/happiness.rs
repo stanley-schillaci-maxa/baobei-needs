@@ -7,7 +7,7 @@ use crate::{
     drawing::UiObject,
 };
 
-use super::materials::GameplayMaterials;
+use super::{items::ItemSystems, materials::GameplayMaterials};
 
 /// Plugin managing the happiness value.
 pub struct HappinessPlugin;
@@ -21,7 +21,7 @@ impl Plugin for HappinessPlugin {
                 SystemSet::on_update(GameState::InGame)
                     .with_system(decrease_happiness_system.system())
                     .with_system(text_update_system.system())
-                    .with_system(update_happiness_sprite_system.system()),
+                    .with_system(update_happiness_sprite_system.system().after(ItemSystems)),
             );
     }
 }

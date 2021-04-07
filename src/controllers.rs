@@ -2,6 +2,10 @@
 
 use bevy::{prelude::*, utils::HashSet};
 
+/// Label for controller systems
+#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemLabel)]
+pub struct ControllerSystems;
+
 /// Plugin managing game controllers such as Keyboard and Gamepad.
 pub struct ControllerPlugin;
 
@@ -9,9 +13,13 @@ impl Plugin for ControllerPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_event::<DirectionEvent>()
             .init_resource::<GamepadLobby>()
-            .add_system_to_stage(CoreStage::PreUpdate, connection_system.system())
-            .add_system_to_stage(CoreStage::PreUpdate, keyboard_system.system())
-            .add_system_to_stage(CoreStage::PreUpdate, gamepad_system.system());
+            .add_system_set(
+                SystemSet::new()
+                    .label(ControllerSystems)
+                    .with_system(connection_system.system())
+                    .with_system(keyboard_system.system())
+                    .with_system(gamepad_system.system()),
+            );
     }
 }
 

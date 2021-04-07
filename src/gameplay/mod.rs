@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use crate::constants::GameState;
+use crate::{collisions::CollisionSystems, constants::GameState, controllers::ControllerSystems};
 
 use self::{
     entities::SpawnEntitiesPlugin, happiness::HappinessPlugin, items::ItemsPlugin,
@@ -28,7 +28,12 @@ impl Plugin for GameplayPlugin {
             .add_system_set(
                 SystemSet::on_update(GameState::InGame)
                     .with_system(back_to_menu_system.system())
-                    .with_system(movement_system.system()),
+                    .with_system(
+                        movement_system
+                            .system()
+                            .after(ControllerSystems)
+                            .before(CollisionSystems),
+                    ),
             )
             .add_plugin(ItemsPlugin)
             .add_plugin(HappinessPlugin);

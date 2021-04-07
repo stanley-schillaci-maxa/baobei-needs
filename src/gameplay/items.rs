@@ -10,6 +10,10 @@ use crate::{
     cooldown::Cooldown,
 };
 
+/// Label for systems managing items
+#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemLabel)]
+pub struct ItemSystems;
+
 /// Plugin managing items and actions.
 pub struct ItemsPlugin;
 
@@ -19,8 +23,9 @@ impl Plugin for ItemsPlugin {
             .insert_resource(PickAndDropCooldown(Cooldown::from_seconds(0.2)))
             .add_system_set(
                 SystemSet::on_update(GameState::InGame)
-                    .with_system(pick_or_drop_system.system())
-                    .with_system(handle_actions_system.system()),
+                    .label(ItemSystems)
+                    .with_system(pick_or_drop_system.system().label("item_actions"))
+                    .with_system(handle_actions_system.system().after("item_actions")),
             );
     }
 }

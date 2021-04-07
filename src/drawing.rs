@@ -3,7 +3,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    collisions::Position,
+    collisions::{CollisionSystems, Position},
     constants::{WINDOW_HEIGHT, WINDOW_WIDTH},
 };
 
@@ -12,13 +12,11 @@ pub struct DrawingPlugin;
 
 impl Plugin for DrawingPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_system_to_stage(
-            CoreStage::Update,
-            update_game_object_position_system.system(),
-        )
-        .add_system_to_stage(
-            CoreStage::Update,
-            update_ui_objects_position_system.system(),
+        app.add_system_set(
+            SystemSet::new()
+                .with_system(update_game_object_position_system.system())
+                .with_system(update_ui_objects_position_system.system())
+                .after(CollisionSystems),
         );
     }
 }

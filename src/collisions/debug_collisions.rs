@@ -6,7 +6,7 @@ use bevy::prelude::*;
 
 use crate::{constants::GameState, drawing::UiObject};
 
-use super::{BoxCollider, Position, TriggerArea};
+use super::{BoxCollider, CollisionSystems, Position, TriggerArea};
 
 /// Plugin for displaying colliders and trigger areas.
 pub struct DebugCollisionPlugin;
@@ -17,6 +17,7 @@ impl Plugin for DebugCollisionPlugin {
             .init_resource::<ColliderViewers>()
             .add_system_set(
                 SystemSet::on_update(GameState::InGame)
+                    .label(CollisionSystems)
                     .with_system(add_collider_viewer_system.system())
                     .with_system(update_collider_viewers_system.system()),
             );

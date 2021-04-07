@@ -14,6 +14,10 @@ use crate::constants::GameState;
 
 mod debug_collisions;
 
+/// Label for collision systems
+#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemLabel)]
+pub struct CollisionSystems;
+
 /// Plugin managing contact collisions
 pub struct CollisionPlugin;
 
@@ -24,6 +28,7 @@ impl Plugin for CollisionPlugin {
             .register_type::<BoxCollider>()
             .add_system_set(
                 SystemSet::on_update(GameState::InGame)
+                    .label(CollisionSystems)
                     .with_system(collision_system.system())
                     .with_system(trigger_area_system.system()),
             )
