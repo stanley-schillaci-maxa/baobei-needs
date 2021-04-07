@@ -125,15 +125,15 @@ pub fn spawn_debug_text(mut commands: Commands, asset_server: Res<AssetServer>) 
                 align_self: AlignSelf::FlexEnd,
                 ..Style::default()
             },
-            text: Text {
-                value: "Happiness:".to_string(),
-                font: asset_server.load("FiraSans-Bold.ttf"),
-                style: TextStyle {
+            text: Text::with_section(
+                "Happiness:",
+                TextStyle {
+                    font: asset_server.load("FiraSans-Bold.ttf"),
                     font_size: 30.0,
                     color: Color::WHITE,
-                    ..TextStyle::default()
                 },
-            },
+                TextAlignment::default(),
+            ),
             ..TextBundle::default()
         })
         .with(HappinessText);

@@ -88,15 +88,15 @@ fn setup_menu(
         .with_children(|parent| {
             parent
                 .spawn(TextBundle {
-                    text: Text {
-                        value: "Baobei needs".to_string(),
-                        font: font.clone(),
-                        style: TextStyle {
+                    text: Text::with_section(
+                        "Baobei needs",
+                        TextStyle {
+                            font: font.clone(),
                             font_size: 125.0,
                             color: Color::WHITE,
-                            ..TextStyle::default()
                         },
-                    },
+                        TextAlignment::default(),
+                    ),
                     ..TextBundle::default()
                 })
                 .spawn(ButtonBundle {
@@ -112,15 +112,15 @@ fn setup_menu(
                 })
                 .with_children(|parent| {
                     parent.spawn(TextBundle {
-                        text: Text {
-                            value: "Play".to_string(),
-                            font: font.clone(),
-                            style: TextStyle {
+                        text: Text::with_section(
+                            "Play",
+                            TextStyle {
+                                font: font.clone(),
                                 font_size: 40.0,
                                 color: Color::WHITE,
-                                ..TextStyle::default()
                             },
-                        },
+                            TextAlignment::default()
+                        ),
                         ..TextBundle::default()
                     });
                 });
