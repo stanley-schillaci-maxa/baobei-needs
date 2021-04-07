@@ -34,9 +34,10 @@ struct MenuMaterials {
     hovered_button: Handle<ColorMaterial>,
 }
 
-impl FromResources for MenuMaterials {
-    fn from_resources(resources: &Resources) -> Self {
-        let mut materials = resources.get_mut::<Assets<ColorMaterial>>().unwrap();
+impl FromWorld for MenuMaterials {
+    fn from_world(world: &mut World) -> Self {
+        let mut materials = world.get_resource_mut::<Assets<ColorMaterial>>().unwrap();
+
         Self {
             none: materials.add(Color::NONE.into()),
             normal_button: materials.add(Color::rgb(0.15, 0.15, 0.15).into()),
@@ -46,7 +47,7 @@ impl FromResources for MenuMaterials {
 }
 
 /// A button interacted by the player.
-type UpdatedButton = (Mutated<Interaction>, With<Button>);
+type UpdatedButton = (Changed<Interaction>, With<Button>);
 
 /// Handles clicks on the `Play` button.
 fn button_system(
@@ -130,7 +131,7 @@ fn setup_menu(
 
 /// Removes all entities of the menu.
 fn cleanup_menu(mut commands: Commands, menu_data: Res<MenuData>) {
-    commands.despawn_recursive(menu_data.node_wrapper);
+    commands.entity(menu_data.node_wrapper).despawn_recursive();
 }
 
 /// Start the game play when the player press `Space`.

@@ -44,9 +44,10 @@ struct ColliderMaterials {
     trigger_area: Handle<ColorMaterial>,
 }
 
-impl FromResources for ColliderMaterials {
-    fn from_resources(resources: &Resources) -> Self {
-        let mut materials = resources.get_mut::<Assets<ColorMaterial>>().unwrap();
+impl FromWorld for ColliderMaterials {
+    fn from_world(world: &mut World) -> Self {
+        let mut materials = world.get_resource_mut::<Assets<ColorMaterial>>().unwrap();
+
         Self {
             collider: materials.add(Color::rgba(0.3, 1.0, 0.3, 0.25).into()),
             trigger_area: materials.add(Color::rgba(0.3, 0.3, 1.0, 0.25).into()),
@@ -75,7 +76,7 @@ fn add_collider_viewer_system(
     non_viewed_trigger_areas: Query<(Entity, &TriggerArea, &Position), Without<ViewedTriggerArea>>,
 ) {
     for (entity, collider, pos) in non_viewed_colliders.iter() {
-        commands.insert(entity, ViewedCollider);
+        commands.entity(entity).insert(ViewedCollider);
 
         let viewer = spawn_viewer(
             commands,
@@ -91,7 +92,7 @@ fn add_collider_viewer_system(
             .push(viewer);
     }
     for (entity, trigger_area, pos) in non_viewed_trigger_areas.iter() {
-        commands.insert(entity, ViewedTriggerArea);
+        commands.entity(entity).insert(ViewedTriggerArea);
 
         let viewer = spawn_viewer(
             commands,
@@ -117,7 +118,7 @@ fn spawn_viewer(
 ) -> Entity {
     commands
         .spawn_bundle((DebugViewer, pos, UIObject))
-        .with_bundle(SpriteBundle {
+        .insert_bundle(SpriteBundle {
             material: color,
             sprite: Sprite::new(size),
             ..SpriteBundle::default()

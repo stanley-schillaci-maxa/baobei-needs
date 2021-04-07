@@ -60,7 +60,7 @@ impl Happiness {
 fn spawn_happiness_smiley(mut commands: Commands, materials: Res<GameplayMaterials>) {
     commands
         .spawn_bundle((UIObject, Position(Vec3::new(1125.0, 300.0, 0.0))))
-        .with_bundle(SpriteSheetBundle {
+        .insert_bundle(SpriteSheetBundle {
             texture_atlas: materials.emotion_atlas.clone(),
             transform: Transform::from_scale(Vec3::splat(0.3)),
             sprite: TextureAtlasSprite {
@@ -136,7 +136,7 @@ pub fn spawn_debug_text(mut commands: Commands, asset_server: Res<AssetServer>) 
             ),
             ..TextBundle::default()
         })
-        .with(HappinessText);
+        .insert(HappinessText);
 }
 
 /// Update the value of the happiness text.

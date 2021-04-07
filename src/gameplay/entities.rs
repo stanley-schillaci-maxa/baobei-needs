@@ -69,7 +69,7 @@ fn spawn_didi_and_baobei(mut commands: Commands, materials: Res<GameplayMaterial
 
     let didi_entity = commands
         .spawn_bundle((Didi, position, collider, Movement::default()))
-        .with_bundle(SpriteBundle {
+        .insert_bundle(SpriteBundle {
             material: materials.didi_sprite.clone(),
             transform,
             ..SpriteBundle::default()
@@ -86,7 +86,7 @@ fn spawn_didi_and_baobei(mut commands: Commands, materials: Res<GameplayMaterial
             AskingItem(asked_item),
             Happiness::happy(),
         ))
-        .with_bundle(SpriteBundle {
+        .insert_bundle(SpriteBundle {
             material: materials.baobei_sprite.clone(),
             transform,
             ..SpriteBundle::default()
@@ -102,7 +102,7 @@ fn spawn_didi_and_baobei(mut commands: Commands, materials: Res<GameplayMaterial
                     },
                     ..SpriteBundle::default()
                 })
-                .with(AskedItem);
+                .insert(AskedItem);
         })
         .id();
 
@@ -121,7 +121,7 @@ fn spawn_furniture(mut commands: Commands, materials: Res<GameplayMaterials>) {
             transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
             ..SpriteBundle::default()
         })
-        .with_bundle((
+        .insert_bundle((
             Position(Vec3::new(1050.0, 500.0, 0.0)),
             BoxCollider {
                 size: Vec2::new(220.0, 40.0),
@@ -135,7 +135,7 @@ fn spawn_furniture(mut commands: Commands, materials: Res<GameplayMaterials>) {
             transform: Transform::from_scale(Vec3::new(0.5, 0.5, 0.0)),
             ..SpriteBundle::default()
         })
-        .with_bundle((
+        .insert_bundle((
             Position(Vec3::new(300.0, 540.0, 0.0)),
             BoxCollider::new(400.0, 100.0),
         ));
@@ -146,7 +146,7 @@ fn spawn_furniture(mut commands: Commands, materials: Res<GameplayMaterials>) {
             transform: Transform::from_scale(Vec3::new(0.35, 0.35, 0.0)),
             ..SpriteBundle::default()
         })
-        .with_bundle((
+        .insert_bundle((
             Position(Vec3::new(720.0, 540.0, 0.0)),
             BoxCollider::new(100.0, 100.0),
         ));
@@ -157,7 +157,7 @@ fn spawn_furniture(mut commands: Commands, materials: Res<GameplayMaterials>) {
             transform: Transform::from_scale(Vec3::new(0.4, 0.4, 0.0)),
             ..SpriteBundle::default()
         })
-        .with_bundle((
+        .insert_bundle((
             Position(Vec3::new(1000.0, 150.0, 0.0)),
             BoxCollider {
                 size: Vec2::new(300.0, 40.0),
@@ -171,7 +171,7 @@ fn spawn_furniture(mut commands: Commands, materials: Res<GameplayMaterials>) {
             transform: Transform::from_scale(Vec3::new(0.4, 0.4, 0.0)),
             ..SpriteBundle::default()
         })
-        .with_bundle((
+        .insert_bundle((
             Position(Vec3::new(300.0, 200.0, 0.0)),
             BoxCollider {
                 size: Vec2::new(300.0, 40.0),

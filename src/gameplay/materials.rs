@@ -34,12 +34,11 @@ pub struct GameplayMaterials {
     pub emotion_atlas: Handle<TextureAtlas>,
 }
 
-impl FromResources for GameplayMaterials {
-    fn from_resources(resources: &Resources) -> Self {
-        let asset_server = resources.get_mut::<AssetServer>().unwrap();
-
-        let mut materials = resources.get_mut::<Assets<ColorMaterial>>().unwrap();
-        let mut texture_atlases = resources.get_mut::<Assets<TextureAtlas>>().unwrap();
+impl FromWorld for GameplayMaterials {
+    fn from_world(world: &mut World) -> Self {
+        let asset_server = world.get_resource::<AssetServer>().unwrap();
+        let mut materials = world.get_resource_mut::<Assets<ColorMaterial>>().unwrap();
+        let mut texture_atlases = world.get_resource_mut::<Assets<TextureAtlas>>().unwrap();
 
         Self {
             none: materials.add(Color::NONE.into()),

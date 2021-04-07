@@ -173,7 +173,7 @@ pub fn handle_actions_system(
         match action {
             ActionEvent::PutAway(item) => {
                 info!("Put way item {:?}", item);
-                commands.remove_one::<Carrying>(didi);
+                commands.entity(didi).remove::<Carrying>();
 
                 for item_in_hand in carried_items.iter() {
                     commands.entity(item_in_hand).despawn();
@@ -181,20 +181,19 @@ pub fn handle_actions_system(
             }
             ActionEvent::Drop(item) => {
                 info!("Drop the item {:?}", item);
-                commands.remove_one::<Carrying>(didi);
+                commands.entity(didi).remove::<Carrying>();
 
                 for item_to_drop in carried_items.iter() {
                     let didi_position = positions.get(didi).unwrap();
 
-                    commands.remove_one::<Parent>(item_to_drop);
-                    commands.remove_one::<CarriedItem>(item_to_drop);
-                    commands.insert_bundle(
-                        item_to_drop,
-                        (
+                    commands
+                        .entity(item_to_drop)
+                        .remove::<Parent>()
+                        .remove::<CarriedItem>()
+                        .insert_bundle((
                             Position(didi_position.0 + picked_item_translation * didi_scale),
                             TriggerArea::new(75.0, 100.0),
-                        ),
-                    );
+                        ));
 
                     if let Ok(mut transform) = transforms.get_mut(item_to_drop) {
                         transform.scale = didi_scale;
@@ -203,12 +202,16 @@ pub fn handle_actions_system(
             }
             ActionEvent::PickUp(item_entity, item) => {
                 info!("Pick up the item {:?}", item);
-                commands.insert(didi, Carrying(*item));
 
-                commands.insert(*item_entity, CarriedItem);
-                commands.remove_one::<Position>(*item_entity);
-                commands.remove_one::<TriggerArea>(*item_entity);
-                commands.push_children(didi, &[*item_entity]);
+                commands
+                    .entity(didi)
+                    .insert(Carrying(*item))
+                    .push_children(&[*item_entity]);
+                commands
+                    .entity(*item_entity)
+                    .insert(CarriedItem)
+                    .remove::<Position>()
+                    .remove::<TriggerArea>();
 
                 if let Ok(mut transform) = transforms.get_mut(*item_entity) {
                     transform.translation = picked_item_translation;
@@ -217,7 +220,6 @@ pub fn handle_actions_system(
             }
             ActionEvent::Take(item) => {
                 info!("Take item {:?}", item);
-                commands.insert(didi, Carrying(*item));
 
                 let item_in_hand = commands
                     .spawn_bundle(SpriteBundle {
@@ -225,11 +227,14 @@ pub fn handle_actions_system(
                         transform: Transform::from_translation(picked_item_translation),
                         ..SpriteBundle::default()
                     })
-                    .with(*item)
-                    .with(CarriedItem)
+                    .insert(*item)
+                    .insert(CarriedItem)
                     .id();
 
-                commands.push_children(didi, &[item_in_hand]);
+                commands
+                    .entity(didi)
+                    .insert(Carrying(*item))
+                    .push_children(&[item_in_hand]);
             }
             ActionEvent::Keep(item) => info!("Keep item {:?}", item),
             ActionEvent::Give(item) => {
@@ -243,7 +248,7 @@ pub fn handle_actions_system(
                     happiness.add(0.15);
 
                     // Remove item
-                    commands.remove_one::<Carrying>(didi);
+                    commands.entity(didi).remove::<Carrying>();
                     for item_in_hand in carried_items.iter() {
                         commands.entity(item_in_hand).despawn();
                     }

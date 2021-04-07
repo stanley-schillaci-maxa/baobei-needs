@@ -44,17 +44,14 @@ pub fn load_sprite_system(
     query: Query<(Entity, &SpriteLoader), Added<SpriteLoader>>,
 ) {
     for (entity, sprite_loader) in query.iter() {
-        commands.remove_one::<SpriteLoader>(entity);
+        commands.entity(entity).remove::<SpriteLoader>();
 
         let path = PathBuf::from(sprite_loader.path.clone());
 
-        commands.insert_bundle(
-            entity,
-            SpriteBundle {
-                material: materials.add(asset_server.load(path).into()),
-                transform: Transform::from_scale(sprite_loader.scale),
-                ..SpriteBundle::default()
-            },
-        );
+        commands.entity(entity).insert_bundle(SpriteBundle {
+            material: materials.add(asset_server.load(path).into()),
+            transform: Transform::from_scale(sprite_loader.scale),
+            ..SpriteBundle::default()
+        });
     }
 }
