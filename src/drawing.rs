@@ -72,7 +72,7 @@ fn update_ui_objects_position_system(
 }
 
 /// Returns the ratio between the current size and the initial one.
-fn window_size_ratio(window: Window) -> Vec3 {
+fn _window_size_ratio(window: Window) -> Vec3 {
     Vec3::new(
         window.width() / WINDOW_WIDTH,
         window.height() / WINDOW_HEIGHT,
