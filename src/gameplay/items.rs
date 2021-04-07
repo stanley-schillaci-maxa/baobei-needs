@@ -218,7 +218,7 @@ pub fn handle_actions_system(
 
                 if let Ok(mut transform) = transforms.get_mut(*item_entity) {
                     transform.translation = picked_item_translation;
-                    transform.scale = Vec3::one();
+                    transform.scale = Vec3::ONE;
                 }
             }
             ActionEvent::Take(item) => {

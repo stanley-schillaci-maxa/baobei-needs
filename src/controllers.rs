@@ -26,7 +26,7 @@ fn keyboard_system(
     keyboard_input: Res<Input<KeyCode>>,
     mut direction_events: EventWriter<DirectionEvent>,
 ) {
-    let mut direction = Vec3::zero();
+    let mut direction = Vec3::ZERO;
 
     if keyboard_input.pressed(KeyCode::Up) {
         direction += Vec3::new(0.0, 1.0, 0.0)
@@ -41,7 +41,7 @@ fn keyboard_system(
         direction += Vec3::new(1.0, 0.0, 0.0)
     }
 
-    if direction != Vec3::zero() {
+    if direction != Vec3::ZERO {
         let direction = direction.normalize();
         direction_events.send(DirectionEvent { direction })
     }

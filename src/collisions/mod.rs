@@ -133,10 +133,10 @@ pub fn collision_system(
             })
         };
 
-        if will_not_collide(pos_a.0 + mov_a.0 * Vec3::unit_x()) {
+        if will_not_collide(pos_a.0 + mov_a.0 * Vec3::X) {
             pos_a.0.x += mov_a.0.x;
         }
-        if will_not_collide(pos_a.0 + mov_a.0 * Vec3::unit_y()) {
+        if will_not_collide(pos_a.0 + mov_a.0 * Vec3::Y) {
             pos_a.0.y += mov_a.0.y;
         }
 
