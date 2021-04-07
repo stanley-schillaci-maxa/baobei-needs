@@ -106,7 +106,7 @@ fn decrease_happiness_system(
     mut timer: ResMut<HappinessTimer>,
     mut happiness_values: Query<&mut Happiness>,
 ) {
-    if !timer.0.tick(time.delta_seconds()).just_finished() {
+    if !timer.0.tick(time.delta()).just_finished() {
         return;
     }
     for mut happiness in happiness_values.iter_mut() {
