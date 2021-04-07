@@ -24,7 +24,7 @@ pub struct DirectionEvent {
 /// Generates direction events when arrow keys are pressed.
 fn keyboard_system(
     keyboard_input: Res<Input<KeyCode>>,
-    mut direction_events: ResMut<Events<DirectionEvent>>,
+    mut direction_events: EventWriter<DirectionEvent>,
 ) {
     let mut direction = Vec3::zero();
 
@@ -52,13 +52,11 @@ fn keyboard_system(
 struct GamepadLobby {
     /// Connected gamepads
     gamepads: HashSet<Gamepad>,
-    /// Reader for gamepad events
-    gamepad_event_reader: EventReader<GamepadEvent>,
 }
 
 /// Adds or removes gamepads to/from the lobby when they are connected or disconnected.
-fn connection_system(mut lobby: ResMut<GamepadLobby>, gamepad_event: Res<Events<GamepadEvent>>) {
-    for event in lobby.gamepad_event_reader.iter(&gamepad_event) {
+fn connection_system(mut lobby: ResMut<GamepadLobby>, mut gamepad_events: EventReader<GamepadEvent>) {
+    for event in gamepad_events.iter() {
         match &event {
             GamepadEvent(gamepad, GamepadEventType::Connected) => {
                 lobby.gamepads.insert(*gamepad);
@@ -77,7 +75,7 @@ fn connection_system(mut lobby: ResMut<GamepadLobby>, gamepad_event: Res<Events<
 fn gamepad_system(
     lobby: Res<GamepadLobby>,
     axes: Res<Axis<GamepadAxis>>,
-    mut direction_events: ResMut<Events<DirectionEvent>>,
+    mut direction_events: EventWriter<DirectionEvent>,
 ) {
     for gamepad in lobby.gamepads.iter().cloned() {
         let left_stick_x = axes

@@ -145,7 +145,7 @@ pub fn collision_system(
 /// events.
 pub fn trigger_area_system(
     mut commands: Commands,
-    mut contact_events: ResMut<Events<ContactEvent>>,
+    mut contact_events: EventWriter<ContactEvent>,
     moving_colliders: Query<(Entity, &Position, &BoxCollider), With<Movement>>,
     trigger_areas: Query<(Entity, &Position, &TriggerArea)>,
     contacts: Query<(&Contact, Entity)>,

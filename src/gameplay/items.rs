@@ -83,7 +83,7 @@ pub fn pick_or_drop_system(
     game_data: Res<GameData>,
     mut cooldown: ResMut<PickAndDropCooldown>,
     keyboard: Res<Input<KeyCode>>,
-    mut action_events: ResMut<Events<ActionEvent>>,
+    mut action_events: EventWriter<ActionEvent>,
     contacts: Query<&Contact>,
     item_producers: Query<&ItemProducer>,
     item_askers: Query<&AskingItem>,
@@ -156,8 +156,7 @@ pub fn pick_or_drop_system(
 #[allow(clippy::too_many_arguments)]
 pub fn handle_actions_system(
     mut commands: Commands,
-    mut action_event_reader: Local<EventReader<ActionEvent>>,
-    action_events: Res<Events<ActionEvent>>,
+    mut action_events: EventReader<ActionEvent>,
     game_data: Res<GameData>,
     materials: Res<GameplayMaterials>,
     carried_items: Query<Entity, With<CarriedItem>>,
@@ -170,7 +169,7 @@ pub fn handle_actions_system(
     let picked_item_translation = Vec3::new(-170.0, -10.0, 0.0);
     let didi_scale = Vec3::new(0.3, 0.3, 0.0);
 
-    for action in action_event_reader.iter(&action_events) {
+    for action in action_events.iter() {
         match action {
             ActionEvent::PutAway(item) => {
                 info!("Put way item {:?}", item);
