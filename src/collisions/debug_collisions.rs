@@ -104,7 +104,10 @@ fn spawn_viewer(
     color: Handle<ColorMaterial>,
 ) -> Entity {
     commands
-        .spawn_bundle((DebugViewer, pos, UiObject))
+        .spawn()
+        .insert(DebugViewer)
+        .insert(pos)
+        .insert(UiObject)
         .insert_bundle(SpriteBundle {
             material: color,
             sprite: Sprite::new(size),

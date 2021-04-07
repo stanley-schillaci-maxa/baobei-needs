@@ -225,13 +225,14 @@ pub fn handle_actions_system(
                 info!("Take item {:?}", item);
 
                 let item_in_hand = commands
-                    .spawn_bundle(SpriteBundle {
+                    .spawn()
+                    .insert(*item)
+                    .insert(CarriedItem)
+                    .insert_bundle(SpriteBundle {
                         material: materials.item_sprite_for(*item),
                         transform: Transform::from_translation(picked_item_translation),
                         ..SpriteBundle::default()
                     })
-                    .insert(*item)
-                    .insert(CarriedItem)
                     .id();
 
                 commands

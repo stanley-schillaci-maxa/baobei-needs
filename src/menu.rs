@@ -76,7 +76,8 @@ fn setup_menu(
     let font = asset_server.load("FiraSans-Bold.ttf");
 
     let node_wrapper = commands
-        .spawn_bundle(NodeBundle {
+        .spawn()
+        .insert_bundle(NodeBundle {
             style: Style {
                 size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
                 padding: Rect::all(Val::Px(50.0)),
@@ -88,7 +89,7 @@ fn setup_menu(
             ..NodeBundle::default()
         })
         .with_children(|parent| {
-            parent.spawn_bundle(TextBundle {
+            parent.spawn().insert_bundle(TextBundle {
                 text: Text::with_section(
                     "Baobei needs",
                     TextStyle {
@@ -101,7 +102,8 @@ fn setup_menu(
                 ..TextBundle::default()
             });
             parent
-                .spawn_bundle(ButtonBundle {
+                .spawn()
+                .insert_bundle(ButtonBundle {
                     style: Style {
                         margin: Rect::all(Val::Px(25.0)),
                         size: Size::new(Val::Px(150.0), Val::Px(65.0)),
@@ -113,7 +115,7 @@ fn setup_menu(
                     ..ButtonBundle::default()
                 })
                 .with_children(|parent| {
-                    parent.spawn_bundle(TextBundle {
+                    parent.spawn().insert_bundle(TextBundle {
                         text: Text::with_section(
                             "Play",
                             TextStyle {
