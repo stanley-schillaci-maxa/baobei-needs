@@ -67,7 +67,7 @@ fn add_collider_viewer_system(
         commands.entity(entity).insert(ViewedCollider);
 
         let viewer = spawn_viewer(
-            commands,
+            &mut commands,
             forwarded_position(pos.0 + collider.offset),
             collider.size,
             materials.collider.clone(),
@@ -83,7 +83,7 @@ fn add_collider_viewer_system(
         commands.entity(entity).insert(ViewedTriggerArea);
 
         let viewer = spawn_viewer(
-            commands,
+            &mut commands,
             forwarded_position(pos.0),
             trigger_area.size,
             materials.trigger_area.clone(),
@@ -99,7 +99,7 @@ fn add_collider_viewer_system(
 
 /// Spawns a viewer at the given position and size and returns the entity.  
 fn spawn_viewer(
-    mut commands: Commands,
+    commands: &mut Commands,
     pos: Position,
     size: Vec2,
     color: Handle<ColorMaterial>,

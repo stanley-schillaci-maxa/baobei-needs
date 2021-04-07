@@ -36,31 +36,45 @@ pub struct GameplayMaterials {
 
 impl FromWorld for GameplayMaterials {
     fn from_world(world: &mut World) -> Self {
-        let asset_server = world.get_resource::<AssetServer>().unwrap();
-        let mut materials = world.get_resource_mut::<Assets<ColorMaterial>>().unwrap();
-        let mut texture_atlases = world.get_resource_mut::<Assets<TextureAtlas>>().unwrap();
+        let none = {
+            let mut materials = world.get_resource_mut::<Assets<ColorMaterial>>().unwrap();
+            materials.add(Color::NONE.into())
+        };
+
+        let emotion_atlas = {
+            let asset_server = world.get_resource::<AssetServer>().unwrap();
+            let sprite = asset_server.load("emotions.png");
+            let atlas = TextureAtlas::from_grid(sprite, Vec2::new(152.0, 152.0), 5, 1);
+
+            let mut texture_atlases = world.get_resource_mut::<Assets<TextureAtlas>>().unwrap();
+            texture_atlases.add(atlas)
+        };
 
         Self {
-            none: materials.add(Color::NONE.into()),
-            didi_sprite: materials.add(asset_server.load("didi.png").into()),
-            background_sprite: materials.add(asset_server.load("background.png").into()),
-            baobei_sprite: materials.add(asset_server.load("baobei.png").into()),
-            ice_cream_sprite: materials.add(asset_server.load("items/ice_cream.png").into()),
-            water_glass_sprite: materials.add(asset_server.load("items/water_glass.png").into()),
-            chips_sprite: materials.add(asset_server.load("items/chips.png").into()),
-            fridge_sprite: materials.add(asset_server.load("furniture/fridge.png").into()),
-            couch_sprite: materials.add(asset_server.load("furniture/couch.png").into()),
-            kitchen_sprite: materials.add(asset_server.load("furniture/kitchen.png").into()),
-            sink_sprite: materials.add(asset_server.load("furniture/sink.png").into()),
-            table_sprite: materials.add(asset_server.load("furniture/table.png").into()),
-            emotion_atlas: texture_atlases.add(TextureAtlas::from_grid(
-                asset_server.load("emotions.png"),
-                Vec2::new(152.0, 152.0),
-                5,
-                1,
-            )),
+            none,
+            didi_sprite: load_sprite(world, "didi.png"),
+            background_sprite: load_sprite(world, "background.png"),
+            baobei_sprite: load_sprite(world, "baobei.png"),
+            ice_cream_sprite: load_sprite(world, "items/ice_cream.png"),
+            water_glass_sprite: load_sprite(world, "items/water_glass.png"),
+            chips_sprite: load_sprite(world, "items/chips.png"),
+            fridge_sprite: load_sprite(world, "furniture/fridge.png"),
+            couch_sprite: load_sprite(world, "furniture/couch.png"),
+            kitchen_sprite: load_sprite(world, "furniture/kitchen.png"),
+            sink_sprite: load_sprite(world, "furniture/sink.png"),
+            table_sprite: load_sprite(world, "furniture/table.png"),
+            emotion_atlas,
         }
     }
+}
+
+/// Load the sprite in the given file.
+fn load_sprite(world: &mut World, file_name: &str) -> Handle<ColorMaterial> {
+    let asset_server = world.get_resource::<AssetServer>().unwrap();
+    let sprite = asset_server.load(file_name).into();
+
+    let mut materials = world.get_resource_mut::<Assets<ColorMaterial>>().unwrap();
+    materials.add(sprite)
 }
 
 impl GameplayMaterials {
