@@ -155,7 +155,7 @@ pub fn pick_or_drop_system(
 /// - Untag Didi with Carrying and despawn the item in hand when dropping
 #[allow(clippy::too_many_arguments)]
 pub fn handle_actions_system(
-    commands: &mut Commands,
+    mut commands: Commands,
     mut action_event_reader: Local<EventReader<ActionEvent>>,
     action_events: Res<Events<ActionEvent>>,
     game_data: Res<GameData>,

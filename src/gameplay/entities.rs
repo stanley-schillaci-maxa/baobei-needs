@@ -38,7 +38,7 @@ pub struct GameData {
 }
 
 /// Spawn the camera.
-fn setup_camera(commands: &mut Commands) {
+fn setup_camera(mut commands: Commands) {
     let mut camera_2d = Camera2dBundle::default();
     camera_2d.transform.translation += Vec3::new(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT / 2.0, 0.0);
 
@@ -46,7 +46,7 @@ fn setup_camera(commands: &mut Commands) {
 }
 
 /// Spawn the background of the screen.
-fn spawn_background(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+fn spawn_background(mut commands: Commands, materials: Res<GameplayMaterials>) {
     commands.spawn(SpriteBundle {
         material: materials.background_sprite.clone(),
         transform: Transform::from_translation(Vec3::new(
@@ -59,7 +59,7 @@ fn spawn_background(commands: &mut Commands, materials: Res<GameplayMaterials>) 
 }
 
 /// Spawn the entity for Didi, the player and Baobei.
-fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+fn spawn_didi_and_baobei(mut commands: Commands, materials: Res<GameplayMaterials>) {
     let position = Position(Vec3::new(640.0, 260.0, 0.0));
     let transform = Transform::from_scale(Vec3::new(0.3, 0.3, 0.0));
     let collider = BoxCollider {
@@ -115,7 +115,7 @@ fn spawn_didi_and_baobei(commands: &mut Commands, materials: Res<GameplayMateria
 }
 
 /// Spawn furniture in the.
-fn spawn_furniture(commands: &mut Commands, materials: Res<GameplayMaterials>) {
+fn spawn_furniture(mut commands: Commands, materials: Res<GameplayMaterials>) {
     commands
         // Sink
         .spawn(SpriteBundle {
@@ -179,7 +179,7 @@ fn spawn_furniture(commands: &mut Commands, materials: Res<GameplayMaterials>) {
 }
 
 /// Spawn item producers.
-fn spawn_item_producers(commands: &mut Commands) {
+fn spawn_item_producers(mut commands: Commands) {
     commands
         .spawn((
             ItemProducer(Item::WaterGlass),
@@ -199,7 +199,7 @@ fn spawn_item_producers(commands: &mut Commands) {
 }
 
 /// Spawn boarders of the room, avoiding the user to go out of the screen.
-fn spawn_boarders(commands: &mut Commands) {
+fn spawn_boarders(mut commands: Commands) {
     /// Gap between the screen limit and the available space.
     const GAP: f32 = 50.0;
 

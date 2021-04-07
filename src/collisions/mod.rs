@@ -144,7 +144,7 @@ pub fn collision_system(
 /// Compares positions of box colliders with trigger areas and emit trigger
 /// events.
 pub fn trigger_area_system(
-    commands: &mut Commands,
+    mut commands: Commands,
     mut contact_events: ResMut<Events<ContactEvent>>,
     moving_colliders: Query<(Entity, &Position, &BoxCollider), With<Movement>>,
     trigger_areas: Query<(Entity, &Position, &TriggerArea)>,

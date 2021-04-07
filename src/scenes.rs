@@ -38,7 +38,7 @@ pub fn _load_scene_system(asset_server: Res<AssetServer>, mut scene_spawner: Res
 
 /// Adds to entities with a `SpritLoader` the related `SpriteBundle`.
 pub fn load_sprite_system(
-    commands: &mut Commands,
+    mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     query: Query<(Entity, &SpriteLoader), Added<SpriteLoader>>,

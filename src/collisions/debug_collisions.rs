@@ -68,7 +68,7 @@ struct ColliderViewers(HashMap<Entity, Vec<Entity>>);
 
 /// Creates a viewer entity for all colliders and trigger areas without one.
 fn add_collider_viewer_system(
-    commands: &mut Commands,
+    mut commands: Commands,
     mut viewers: ResMut<ColliderViewers>,
     materials: ResMut<ColliderMaterials>,
     non_viewed_colliders: Query<(Entity, &BoxCollider, &Position), Without<ViewedCollider>>,
@@ -110,7 +110,7 @@ fn add_collider_viewer_system(
 
 /// Spawns a viewer at the given position and size and returns the entity.  
 fn spawn_viewer(
-    commands: &mut Commands,
+    mut commands: Commands,
     pos: Position,
     size: Vec2,
     color: Handle<ColorMaterial>,
@@ -158,7 +158,7 @@ fn update_collider_viewers_system(
 
 /// Refresh the position of collision viewers when the player presses `D`.
 fn refresh_collider_viewers_system(
-    commands: &mut Commands,
+    mut commands: Commands,
     keyboard_input: Res<Input<KeyCode>>,
     all_viewers: Res<ColliderViewers>,
     collider_positions: Query<&Position, Without<DebugViewer>>,

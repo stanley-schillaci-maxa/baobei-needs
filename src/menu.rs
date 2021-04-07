@@ -65,7 +65,7 @@ fn button_system(
 
 /// Setup the title and `Play` button in the main menu.
 fn setup_menu(
-    commands: &mut Commands,
+    mut commands: Commands,
     asset_server: Res<AssetServer>,
     materials: Res<MenuMaterials>,
 ) {
@@ -132,7 +132,7 @@ fn setup_menu(
 }
 
 /// Removes all entities of the menu.
-fn cleanup_menu(commands: &mut Commands, menu_data: Res<MenuData>) {
+fn cleanup_menu(mut commands: Commands, menu_data: Res<MenuData>) {
     commands.despawn_recursive(menu_data.node_wrapper);
 }
 
