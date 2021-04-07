@@ -11,11 +11,8 @@ pub const SPEED: f32 = 750.0;
 /// Happiness decrease per second
 pub const HAPPINESS_DECREASE: f32 = 0.05; // 5%
 
-/// Name of the stage related to the game state.
-pub const STAGE: &str = "game_state";
-
 /// States of the game
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum GameState {
     /// The menu phase
     Menu,

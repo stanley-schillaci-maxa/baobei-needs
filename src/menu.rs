@@ -2,7 +2,7 @@
 
 use bevy::{input::system::exit_on_esc_system, prelude::*};
 
-use crate::constants::{GameState, STAGE};
+use crate::constants::GameState;
 
 /// Plugin managing contact collisions
 pub struct MenuPlugin;
@@ -10,11 +10,14 @@ pub struct MenuPlugin;
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.init_resource::<MenuMaterials>()
-            .on_state_enter(STAGE, GameState::Menu, setup_menu.system())
-            .on_state_update(STAGE, GameState::Menu, button_system.system())
-            .on_state_update(STAGE, GameState::Menu, play_on_space_system.system())
-            .on_state_update(STAGE, GameState::Menu, exit_on_esc_system.system())
-            .on_state_exit(STAGE, GameState::Menu, cleanup_menu.system());
+            .add_system_set(SystemSet::on_enter(GameState::Menu).with_system(setup_menu.system()))
+            .add_system_set(
+                SystemSet::on_update(GameState::Menu)
+                    .with_system(button_system.system())
+                    .with_system(play_on_space_system.system())
+                    .with_system(exit_on_esc_system.system()),
+            )
+            .add_system_set(SystemSet::on_exit(GameState::Menu).with_system(cleanup_menu.system()));
     }
 }
 
@@ -57,7 +60,7 @@ fn button_system(
 ) {
     for (interaction, mut material) in interaction_query.iter_mut() {
         match *interaction {
-            Interaction::Clicked => state.set_next(GameState::InGame).unwrap(),
+            Interaction::Clicked => state.set(GameState::InGame).unwrap(),
             Interaction::Hovered => *material = materials.hovered_button.clone(),
             Interaction::None => *material = materials.normal_button.clone(),
         }
@@ -137,6 +140,6 @@ fn cleanup_menu(mut commands: Commands, menu_data: Res<MenuData>) {
 /// Start the game play when the player press `Space`.
 fn play_on_space_system(keyboard_input: Res<Input<KeyCode>>, mut state: ResMut<State<GameState>>) {
     if keyboard_input.just_pressed(KeyCode::Space) {
-        state.set_next(GameState::InGame).unwrap();
+        state.set(GameState::InGame).unwrap();
     }
 }

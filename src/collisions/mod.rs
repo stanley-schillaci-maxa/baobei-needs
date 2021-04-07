@@ -10,7 +10,7 @@ use std::{
 use bevy::{prelude::*, sprite::collide_aabb::collide};
 use debug_collisions::DebugCollisionPlugin;
 
-use crate::constants::{GameState, STAGE};
+use crate::constants::GameState;
 
 mod debug_collisions;
 
@@ -22,8 +22,11 @@ impl Plugin for CollisionPlugin {
         app.add_event::<ContactEvent>()
             .register_type::<Position>()
             .register_type::<BoxCollider>()
-            .on_state_update(STAGE, GameState::InGame, collision_system.system())
-            .on_state_update(STAGE, GameState::InGame, trigger_area_system.system())
+            .add_system_set(
+                SystemSet::on_update(GameState::InGame)
+                    .with_system(collision_system.system())
+                    .with_system(trigger_area_system.system()),
+            )
             .add_plugin(DebugCollisionPlugin);
     }
 }

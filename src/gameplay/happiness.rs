@@ -3,7 +3,7 @@ use bevy::prelude::*;
 
 use crate::{
     collisions::Position,
-    constants::{GameState, HAPPINESS_DECREASE, STAGE},
+    constants::{GameState, HAPPINESS_DECREASE},
     drawing::UIObject,
 };
 
@@ -17,12 +17,11 @@ impl Plugin for HappinessPlugin {
         app.insert_resource(HappinessTimer::default())
             .add_startup_system(spawn_happiness_smiley.system())
             .add_startup_system(spawn_debug_text.system())
-            .on_state_update(STAGE, GameState::InGame, decrease_happiness_system.system())
-            .on_state_update(STAGE, GameState::InGame, text_update_system.system())
-            .on_state_update(
-                STAGE,
-                GameState::InGame,
-                update_happiness_sprite_system.system(),
+            .add_system_set(
+                SystemSet::on_update(GameState::InGame)
+                    .with_system(decrease_happiness_system.system())
+                    .with_system(text_update_system.system())
+                    .with_system(update_happiness_sprite_system.system()),
             );
     }
 }
@@ -146,7 +145,7 @@ fn text_update_system(
 ) {
     for mut text in happiness_text.iter_mut() {
         if let Some(value) = happiness_value.iter().next() {
-            text.value = format!("Happiness: {:.2}", value.0);
+            text.sections[0].value = format!("Happiness: {:.2}", value.0);
         }
     }
 }

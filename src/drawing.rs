@@ -12,8 +12,14 @@ pub struct DrawingPlugin;
 
 impl Plugin for DrawingPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_system_to_stage(stage::UPDATE, update_game_object_position_system.system())
-            .add_system_to_stage(stage::UPDATE, update_ui_objects_position_system.system());
+        app.add_system_to_stage(
+            CoreStage::Update,
+            update_game_object_position_system.system(),
+        )
+        .add_system_to_stage(
+            CoreStage::Update,
+            update_ui_objects_position_system.system(),
+        );
     }
 }
 

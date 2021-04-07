@@ -3,7 +3,6 @@
 use bevy::prelude::*;
 
 use crate::constants::GameState;
-use crate::constants::STAGE;
 
 use self::{
     entities::SpawnEntitiesPlugin, happiness::HappinessPlugin, items::ItemsPlugin,
@@ -26,8 +25,11 @@ impl Plugin for GameplayPlugin {
             .register_type::<Furniture>()
             .register_type::<Baobei>()
             .add_plugin(SpawnEntitiesPlugin)
-            .on_state_update(STAGE, GameState::InGame, back_to_menu_system.system())
-            .on_state_update(STAGE, GameState::InGame, movement_system.system())
+            .add_system_set(
+                SystemSet::on_update(GameState::InGame)
+                    .with_system(back_to_menu_system.system())
+                    .with_system(movement_system.system()),
+            )
             .add_plugin(ItemsPlugin)
             .add_plugin(HappinessPlugin);
     }
@@ -36,7 +38,7 @@ impl Plugin for GameplayPlugin {
 /// Goes back to the menu state when the player press `Escape`.
 fn back_to_menu_system(keyboard_input: Res<Input<KeyCode>>, mut state: ResMut<State<GameState>>) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
-        state.set_next(GameState::Menu).unwrap();
+        state.set(GameState::Menu).unwrap();
     }
 }
 

@@ -4,10 +4,7 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 
-use crate::{
-    constants::{GameState, STAGE},
-    drawing::UIObject,
-};
+use crate::{constants::GameState, drawing::UIObject};
 
 use super::{BoxCollider, Position, TriggerArea};
 
@@ -18,20 +15,11 @@ impl Plugin for DebugCollisionPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.init_resource::<ColliderMaterials>()
             .init_resource::<ColliderViewers>()
-            .on_state_update(
-                STAGE,
-                GameState::InGame,
-                add_collider_viewer_system.system(),
-            )
-            .on_state_update(
-                STAGE,
-                GameState::InGame,
-                update_collider_viewers_system.system(),
-            )
-            .on_state_update(
-                STAGE,
-                GameState::InGame,
-                refresh_collider_viewers_system.system(),
+            .add_system_set(
+                SystemSet::on_update(GameState::InGame)
+                    .with_system(add_collider_viewer_system.system())
+                    .with_system(update_collider_viewers_system.system())
+                    .with_system(refresh_collider_viewers_system.system()),
             );
     }
 }

@@ -27,7 +27,7 @@ mod scenes;
 use bevy::prelude::*;
 
 use collisions::CollisionPlugin;
-use constants::{GameState, STAGE, WINDOW_HEIGHT, WINDOW_WIDTH};
+use constants::{GameState, WINDOW_HEIGHT, WINDOW_WIDTH};
 use controllers::ControllerPlugin;
 use drawing::DrawingPlugin;
 use gameplay::GameplayPlugin;
@@ -47,8 +47,7 @@ fn main() {
             resizable: false,
             ..WindowDescriptor::default()
         })
-        .insert_resource(State::new(GameState::Menu))
-        .add_stage_after(stage::UPDATE, STAGE, StateStage::<GameState>::default())
+        .add_state(GameState::Menu)
         .add_plugins(DefaultPlugins)
         .add_plugin(ControllerPlugin)
         .add_plugin(CollisionPlugin)

@@ -9,9 +9,9 @@ impl Plugin for ControllerPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_event::<DirectionEvent>()
             .init_resource::<GamepadLobby>()
-            .add_system_to_stage(stage::PRE_EVENT, connection_system.system())
-            .add_system_to_stage(stage::EVENT, keyboard_system.system())
-            .add_system_to_stage(stage::EVENT, gamepad_system.system());
+            .add_system_to_stage(CoreStage::PreUpdate, connection_system.system())
+            .add_system_to_stage(CoreStage::PreUpdate, keyboard_system.system())
+            .add_system_to_stage(CoreStage::PreUpdate, gamepad_system.system());
     }
 }
 
