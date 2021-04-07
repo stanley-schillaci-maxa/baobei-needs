@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 
-use crate::{constants::GameState, drawing::UIObject};
+use crate::{constants::GameState, drawing::UiObject};
 
 use super::{BoxCollider, Position, TriggerArea};
 
@@ -105,7 +105,7 @@ fn spawn_viewer(
     color: Handle<ColorMaterial>,
 ) -> Entity {
     commands
-        .spawn_bundle((DebugViewer, pos, UIObject))
+        .spawn_bundle((DebugViewer, pos, UiObject))
         .insert_bundle(SpriteBundle {
             material: color,
             sprite: Sprite::new(size),

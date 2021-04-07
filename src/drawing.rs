@@ -24,7 +24,7 @@ impl Plugin for DrawingPlugin {
 }
 
 /// Component meaning that the entity will be drawn in the foreground as a UI object.
-pub struct UIObject;
+pub struct UiObject;
 
 /// Limit value in which the displayed sprite is visible.
 /// z = 0 => background, z = 1000 => foreground
@@ -37,7 +37,7 @@ const Z_LIMIT: f32 = 1000.0;
 /// of the window
 fn update_game_object_position_system(
     // windows: Res<Windows>,
-    mut game_objects: Query<(&Position, &mut Transform), Without<(Parent, UIObject)>>,
+    mut game_objects: Query<(&Position, &mut Transform), Without<(Parent, UiObject)>>,
 ) {
     // TODO: scale depending on window size
     // let window = windows.get_primary().unwrap();
@@ -57,7 +57,7 @@ fn update_game_object_position_system(
 
 /// Updates transform of UI objects following their position.
 fn update_ui_objects_position_system(
-    mut ui_objects: Query<(&Position, &mut Transform), With<UIObject>>,
+    mut ui_objects: Query<(&Position, &mut Transform), With<UiObject>>,
 ) {
     for (position, mut transform) in ui_objects.iter_mut() {
         transform.translation = position.0;

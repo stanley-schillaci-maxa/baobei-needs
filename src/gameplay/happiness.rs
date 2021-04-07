@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use crate::{
     collisions::Position,
     constants::{GameState, HAPPINESS_DECREASE},
-    drawing::UIObject,
+    drawing::UiObject,
 };
 
 use super::materials::GameplayMaterials;
@@ -58,7 +58,7 @@ impl Happiness {
 /// Spawn boarders of the room, avoiding the user to go out of the screen.
 fn spawn_happiness_smiley(mut commands: Commands, materials: Res<GameplayMaterials>) {
     commands
-        .spawn_bundle((UIObject, Position(Vec3::new(1125.0, 300.0, 0.0))))
+        .spawn_bundle((UiObject, Position(Vec3::new(1125.0, 300.0, 0.0))))
         .insert_bundle(SpriteSheetBundle {
             texture_atlas: materials.emotion_atlas.clone(),
             transform: Transform::from_scale(Vec3::splat(0.3)),
