@@ -14,7 +14,7 @@ pub struct HappinessPlugin;
 
 impl Plugin for HappinessPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_resource(HappinessTimer::default())
+        app.insert_resource(HappinessTimer::default())
             .add_startup_system(spawn_happiness_smiley.system())
             .add_startup_system(spawn_debug_text.system())
             .on_state_update(STAGE, GameState::InGame, decrease_happiness_system.system())

@@ -16,7 +16,7 @@ pub struct ItemsPlugin;
 impl Plugin for ItemsPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_event::<ActionEvent>()
-            .add_resource(PickAndDropCooldown(Cooldown::from_seconds(0.2)))
+            .insert_resource(PickAndDropCooldown(Cooldown::from_seconds(0.2)))
             .on_state_update(STAGE, GameState::InGame, pick_or_drop_system.system())
             .on_state_update(STAGE, GameState::InGame, handle_actions_system.system());
     }

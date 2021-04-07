@@ -36,18 +36,18 @@ use scenes::SceneLoaderPlugin;
 
 fn main() {
     App::build()
-        .add_resource(bevy::log::LogSettings {
+        .insert_resource(bevy::log::LogSettings {
             level: bevy::log::Level::INFO,
             filter: "wgpu=error,bevy_ecs=info".to_string(),
         })
-        .add_resource(WindowDescriptor {
+        .insert_resource(WindowDescriptor {
             title: "Baobei needs".to_string(),
             width: WINDOW_WIDTH,
             height: WINDOW_HEIGHT,
             resizable: false,
             ..WindowDescriptor::default()
         })
-        .add_resource(State::new(GameState::Menu))
+        .insert_resource(State::new(GameState::Menu))
         .add_stage_after(stage::UPDATE, STAGE, StateStage::<GameState>::default())
         .add_plugins(DefaultPlugins)
         .add_plugin(ControllerPlugin)
