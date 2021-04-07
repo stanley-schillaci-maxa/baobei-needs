@@ -176,7 +176,7 @@ pub fn handle_actions_system(
                 commands.remove_one::<Carrying>(didi);
 
                 for item_in_hand in carried_items.iter() {
-                    commands.despawn(item_in_hand);
+                    commands.entity(item_in_hand).despawn();
                 }
             }
             ActionEvent::Drop(item) => {
@@ -220,15 +220,14 @@ pub fn handle_actions_system(
                 commands.insert(didi, Carrying(*item));
 
                 let item_in_hand = commands
-                    .spawn(SpriteBundle {
+                    .spawn_bundle(SpriteBundle {
                         material: materials.item_sprite_for(*item),
                         transform: Transform::from_translation(picked_item_translation),
                         ..SpriteBundle::default()
                     })
                     .with(*item)
                     .with(CarriedItem)
-                    .current_entity()
-                    .unwrap();
+                    .id();
 
                 commands.push_children(didi, &[item_in_hand]);
             }
@@ -246,7 +245,7 @@ pub fn handle_actions_system(
                     // Remove item
                     commands.remove_one::<Carrying>(didi);
                     for item_in_hand in carried_items.iter() {
-                        commands.despawn(item_in_hand);
+                        commands.entity(item_in_hand).despawn();
                     }
 
                     // Add another item

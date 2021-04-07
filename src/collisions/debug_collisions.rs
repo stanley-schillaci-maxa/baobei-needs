@@ -116,14 +116,13 @@ fn spawn_viewer(
     color: Handle<ColorMaterial>,
 ) -> Entity {
     commands
-        .spawn((DebugViewer, pos, UIObject))
+        .spawn_bundle((DebugViewer, pos, UIObject))
         .with_bundle(SpriteBundle {
             material: color,
             sprite: Sprite::new(size),
             ..SpriteBundle::default()
         })
-        .current_entity()
-        .unwrap()
+        .id()
 }
 
 /// Query filter of a entity with a moved collider.
@@ -178,7 +177,7 @@ fn refresh_collider_viewers_system(
                         *viewer_pos = forwarded_position(pos.0 + offset);
                     }
                 } else {
-                    commands.despawn(*viewer);
+                    commands.entity(*viewer).despawn();
                 }
             }
         }

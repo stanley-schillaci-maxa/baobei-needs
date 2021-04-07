@@ -42,12 +42,12 @@ fn setup_camera(mut commands: Commands) {
     let mut camera_2d = Camera2dBundle::default();
     camera_2d.transform.translation += Vec3::new(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT / 2.0, 0.0);
 
-    commands.spawn(camera_2d);
+    commands.spawn_bundle(camera_2d);
 }
 
 /// Spawn the background of the screen.
 fn spawn_background(mut commands: Commands, materials: Res<GameplayMaterials>) {
-    commands.spawn(SpriteBundle {
+    commands.spawn_bundle(SpriteBundle {
         material: materials.background_sprite.clone(),
         transform: Transform::from_translation(Vec3::new(
             WINDOW_WIDTH / 2.0,
@@ -68,19 +68,18 @@ fn spawn_didi_and_baobei(mut commands: Commands, materials: Res<GameplayMaterial
     };
 
     let didi_entity = commands
-        .spawn((Didi, position, collider, Movement::default()))
+        .spawn_bundle((Didi, position, collider, Movement::default()))
         .with_bundle(SpriteBundle {
             material: materials.didi_sprite.clone(),
             transform,
             ..SpriteBundle::default()
         })
-        .current_entity()
-        .unwrap();
+        .id();
 
     let asked_item = random::<Item>();
 
     let baobei_entity = commands
-        .spawn((
+        .spawn_bundle((
             Baobei,
             Position(Vec3::new(1050.0, 150.0, 85.0)),
             TriggerArea::new(150.0, 150.0),
@@ -94,7 +93,7 @@ fn spawn_didi_and_baobei(mut commands: Commands, materials: Res<GameplayMaterial
         })
         .with_children(|parent| {
             parent
-                .spawn(SpriteBundle {
+                .spawn_bundle(SpriteBundle {
                     material: materials.item_sprite_for(asked_item),
                     transform: Transform {
                         translation: Vec3::new(0.0, 475.0, 0.0),
@@ -105,8 +104,7 @@ fn spawn_didi_and_baobei(mut commands: Commands, materials: Res<GameplayMaterial
                 })
                 .with(AskedItem);
         })
-        .current_entity()
-        .unwrap();
+        .id();
 
     commands.insert_resource(GameData {
         didi_entity,
@@ -116,9 +114,9 @@ fn spawn_didi_and_baobei(mut commands: Commands, materials: Res<GameplayMaterial
 
 /// Spawn furniture in the.
 fn spawn_furniture(mut commands: Commands, materials: Res<GameplayMaterials>) {
+    // Sink
     commands
-        // Sink
-        .spawn(SpriteBundle {
+        .spawn_bundle(SpriteBundle {
             material: materials.sink_sprite.clone(),
             transform: Transform::from_scale(Vec3::new(0.3, 0.3, 0.0)),
             ..SpriteBundle::default()
@@ -129,9 +127,10 @@ fn spawn_furniture(mut commands: Commands, materials: Res<GameplayMaterials>) {
                 size: Vec2::new(220.0, 40.0),
                 offset: Vec3::new(0.0, 10.0, 0.0),
             },
-        ))
-        // Kitchen
-        .spawn(SpriteBundle {
+        ));
+    // Kitchen
+    commands
+        .spawn_bundle(SpriteBundle {
             material: materials.kitchen_sprite.clone(),
             transform: Transform::from_scale(Vec3::new(0.5, 0.5, 0.0)),
             ..SpriteBundle::default()
@@ -139,9 +138,10 @@ fn spawn_furniture(mut commands: Commands, materials: Res<GameplayMaterials>) {
         .with_bundle((
             Position(Vec3::new(300.0, 540.0, 0.0)),
             BoxCollider::new(400.0, 100.0),
-        ))
-        // Fridge
-        .spawn(SpriteBundle {
+        ));
+    // Fridge
+    commands
+        .spawn_bundle(SpriteBundle {
             material: materials.fridge_sprite.clone(),
             transform: Transform::from_scale(Vec3::new(0.35, 0.35, 0.0)),
             ..SpriteBundle::default()
@@ -149,9 +149,10 @@ fn spawn_furniture(mut commands: Commands, materials: Res<GameplayMaterials>) {
         .with_bundle((
             Position(Vec3::new(720.0, 540.0, 0.0)),
             BoxCollider::new(100.0, 100.0),
-        ))
-        // Couch
-        .spawn(SpriteBundle {
+        ));
+    // Couch
+    commands
+        .spawn_bundle(SpriteBundle {
             material: materials.couch_sprite.clone(),
             transform: Transform::from_scale(Vec3::new(0.4, 0.4, 0.0)),
             ..SpriteBundle::default()
@@ -162,9 +163,10 @@ fn spawn_furniture(mut commands: Commands, materials: Res<GameplayMaterials>) {
                 size: Vec2::new(300.0, 40.0),
                 offset: Vec3::new(10.0, 15.0, 0.0),
             },
-        ))
-        // Table
-        .spawn(SpriteBundle {
+        ));
+    // Table
+    commands
+        .spawn_bundle(SpriteBundle {
             material: materials.table_sprite.clone(),
             transform: Transform::from_scale(Vec3::new(0.4, 0.4, 0.0)),
             ..SpriteBundle::default()
@@ -180,22 +182,21 @@ fn spawn_furniture(mut commands: Commands, materials: Res<GameplayMaterials>) {
 
 /// Spawn item producers.
 fn spawn_item_producers(mut commands: Commands) {
-    commands
-        .spawn((
-            ItemProducer(Item::WaterGlass),
-            Position(Vec3::new(1050.0, 500.0, 0.0)),
-            TriggerArea::new(230.0, 50.0),
-        ))
-        .spawn((
-            ItemProducer(Item::Chips),
-            Position(Vec3::new(210.0, 480.0, 0.0)),
-            TriggerArea::new(75.0, 75.0),
-        ))
-        .spawn((
-            ItemProducer(Item::IceCream),
-            Position(Vec3::new(720.0, 540.0, 0.0)),
-            TriggerArea::new(175.0, 175.0),
-        ));
+    commands.spawn_bundle((
+        ItemProducer(Item::WaterGlass),
+        Position(Vec3::new(1050.0, 500.0, 0.0)),
+        TriggerArea::new(230.0, 50.0),
+    ));
+    commands.spawn_bundle((
+        ItemProducer(Item::Chips),
+        Position(Vec3::new(210.0, 480.0, 0.0)),
+        TriggerArea::new(75.0, 75.0),
+    ));
+    commands.spawn_bundle((
+        ItemProducer(Item::IceCream),
+        Position(Vec3::new(720.0, 540.0, 0.0)),
+        TriggerArea::new(175.0, 175.0),
+    ));
 }
 
 /// Spawn boarders of the room, avoiding the user to go out of the screen.
@@ -203,29 +204,28 @@ fn spawn_boarders(mut commands: Commands) {
     /// Gap between the screen limit and the available space.
     const GAP: f32 = 50.0;
 
-    commands
-        // Top
-        .spawn((
-            Position(Vec3::new(WINDOW_WIDTH / 2.0, 510.0 + GAP, 0.0)),
-            BoxCollider::new(WINDOW_WIDTH, GAP),
-        ))
-        // Bottom
-        .spawn((
-            Position(Vec3::new(WINDOW_WIDTH / 2.0, GAP / 2.0, 0.0)),
-            BoxCollider::new(WINDOW_WIDTH, GAP),
-        ))
-        // Left
-        .spawn((
-            Position(Vec3::new(GAP / 2.0, WINDOW_HEIGHT / 2.0, 0.0)),
-            BoxCollider::new(GAP, WINDOW_HEIGHT),
-        ))
-        // Right
-        .spawn((
-            Position(Vec3::new(
-                WINDOW_WIDTH - GAP / 2.0,
-                WINDOW_HEIGHT / 2.0,
-                0.0,
-            )),
-            BoxCollider::new(GAP, WINDOW_HEIGHT),
-        ));
+    // Top
+    commands.spawn_bundle((
+        Position(Vec3::new(WINDOW_WIDTH / 2.0, 510.0 + GAP, 0.0)),
+        BoxCollider::new(WINDOW_WIDTH, GAP),
+    ));
+    // Bottom
+    commands.spawn_bundle((
+        Position(Vec3::new(WINDOW_WIDTH / 2.0, GAP / 2.0, 0.0)),
+        BoxCollider::new(WINDOW_WIDTH, GAP),
+    ));
+    // Left
+    commands.spawn_bundle((
+        Position(Vec3::new(GAP / 2.0, WINDOW_HEIGHT / 2.0, 0.0)),
+        BoxCollider::new(GAP, WINDOW_HEIGHT),
+    ));
+    // Right
+    commands.spawn_bundle((
+        Position(Vec3::new(
+            WINDOW_WIDTH - GAP / 2.0,
+            WINDOW_HEIGHT / 2.0,
+            0.0,
+        )),
+        BoxCollider::new(GAP, WINDOW_HEIGHT),
+    ));
 }

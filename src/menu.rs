@@ -69,12 +69,12 @@ fn setup_menu(
     asset_server: Res<AssetServer>,
     materials: Res<MenuMaterials>,
 ) {
-    commands.spawn(CameraUiBundle::default());
+    commands.spawn_bundle(CameraUiBundle::default());
 
     let font = asset_server.load("FiraSans-Bold.ttf");
 
     let node_wrapper = commands
-        .spawn(NodeBundle {
+        .spawn_bundle(NodeBundle {
             style: Style {
                 size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
                 padding: Rect::all(Val::Px(50.0)),
@@ -86,20 +86,20 @@ fn setup_menu(
             ..NodeBundle::default()
         })
         .with_children(|parent| {
+            parent.spawn_bundle(TextBundle {
+                text: Text::with_section(
+                    "Baobei needs",
+                    TextStyle {
+                        font: font.clone(),
+                        font_size: 125.0,
+                        color: Color::WHITE,
+                    },
+                    TextAlignment::default(),
+                ),
+                ..TextBundle::default()
+            });
             parent
-                .spawn(TextBundle {
-                    text: Text::with_section(
-                        "Baobei needs",
-                        TextStyle {
-                            font: font.clone(),
-                            font_size: 125.0,
-                            color: Color::WHITE,
-                        },
-                        TextAlignment::default(),
-                    ),
-                    ..TextBundle::default()
-                })
-                .spawn(ButtonBundle {
+                .spawn_bundle(ButtonBundle {
                     style: Style {
                         margin: Rect::all(Val::Px(25.0)),
                         size: Size::new(Val::Px(150.0), Val::Px(65.0)),
@@ -111,7 +111,7 @@ fn setup_menu(
                     ..ButtonBundle::default()
                 })
                 .with_children(|parent| {
-                    parent.spawn(TextBundle {
+                    parent.spawn_bundle(TextBundle {
                         text: Text::with_section(
                             "Play",
                             TextStyle {
@@ -119,14 +119,13 @@ fn setup_menu(
                                 font_size: 40.0,
                                 color: Color::WHITE,
                             },
-                            TextAlignment::default()
+                            TextAlignment::default(),
                         ),
                         ..TextBundle::default()
                     });
                 });
         })
-        .current_entity()
-        .unwrap();
+        .id();
 
     commands.insert_resource(MenuData { node_wrapper });
 }

@@ -59,7 +59,7 @@ impl Happiness {
 /// Spawn boarders of the room, avoiding the user to go out of the screen.
 fn spawn_happiness_smiley(mut commands: Commands, materials: Res<GameplayMaterials>) {
     commands
-        .spawn((UIObject, Position(Vec3::new(1125.0, 300.0, 0.0))))
+        .spawn_bundle((UIObject, Position(Vec3::new(1125.0, 300.0, 0.0))))
         .with_bundle(SpriteSheetBundle {
             texture_atlas: materials.emotion_atlas.clone(),
             transform: Transform::from_scale(Vec3::splat(0.3)),
@@ -120,7 +120,7 @@ struct HappinessText;
 /// Spawn debug text showing the happiness value.
 pub fn spawn_debug_text(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
-        .spawn(TextBundle {
+        .spawn_bundle(TextBundle {
             style: Style {
                 align_self: AlignSelf::FlexEnd,
                 ..Style::default()

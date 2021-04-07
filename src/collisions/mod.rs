@@ -167,7 +167,7 @@ pub fn trigger_area_system(
         debug!("Started contact: {:?}", started_contact);
 
         contact_events.send(ContactEvent::Started(started_contact));
-        commands.spawn((started_contact,));
+        commands.spawn().insert(started_contact);
     }
 
     for stopped_contact in prev_contacts.difference(&next_contacts) {
@@ -175,7 +175,7 @@ pub fn trigger_area_system(
 
         contact_events.send(ContactEvent::Stopped(*stopped_contact));
         if let Some(&entity) = prev_entities.get(stopped_contact) {
-            commands.despawn(entity);
+            commands.entity(entity).despawn();
         }
     }
 }
