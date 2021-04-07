@@ -30,6 +30,9 @@ pub struct UiObject;
 /// z = 0 => background, z = 1000 => foreground
 const Z_LIMIT: f32 = 1000.0;
 
+/// Query filter for game entities that are moved
+type MovedGameObject = (Without<(Parent, UiObject)>, Changed<Position>);
+
 /// Updates transform of game objects following their game position.
 ///
 /// TODO: Scales the translation and sprite scale with the window size.
@@ -37,7 +40,7 @@ const Z_LIMIT: f32 = 1000.0;
 /// of the window
 fn update_game_object_position_system(
     // windows: Res<Windows>,
-    mut game_objects: Query<(&Position, &mut Transform), Without<(Parent, UiObject)>>,
+    mut game_objects: Query<(&Position, &mut Transform), MovedGameObject>,
 ) {
     // TODO: scale depending on window size
     // let window = windows.get_primary().unwrap();
@@ -55,9 +58,12 @@ fn update_game_object_position_system(
     }
 }
 
+/// Query filter for UI entities that are moved
+type MovedUiObject = (With<UiObject>, Changed<Position>);
+
 /// Updates transform of UI objects following their position.
 fn update_ui_objects_position_system(
-    mut ui_objects: Query<(&Position, &mut Transform), With<UiObject>>,
+    mut ui_objects: Query<(&Position, &mut Transform), MovedUiObject>,
 ) {
     for (position, mut transform) in ui_objects.iter_mut() {
         transform.translation = position.0;
