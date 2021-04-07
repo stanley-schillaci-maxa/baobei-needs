@@ -39,7 +39,7 @@ pub struct GameData {
 
 /// Spawn the camera.
 fn setup_camera(mut commands: Commands) {
-    let mut camera_2d = Camera2dBundle::default();
+    let mut camera_2d = OrthographicCameraBundle::new_2d();
     camera_2d.transform.translation += Vec3::new(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT / 2.0, 0.0);
 
     commands.spawn_bundle(camera_2d);

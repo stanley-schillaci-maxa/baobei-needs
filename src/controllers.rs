@@ -55,7 +55,10 @@ struct GamepadLobby {
 }
 
 /// Adds or removes gamepads to/from the lobby when they are connected or disconnected.
-fn connection_system(mut lobby: ResMut<GamepadLobby>, mut gamepad_events: EventReader<GamepadEvent>) {
+fn connection_system(
+    mut lobby: ResMut<GamepadLobby>,
+    mut gamepad_events: EventReader<GamepadEvent>,
+) {
     for event in gamepad_events.iter() {
         match &event {
             GamepadEvent(gamepad, GamepadEventType::Connected) => {
