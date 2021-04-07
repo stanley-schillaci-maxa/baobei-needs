@@ -31,8 +31,11 @@ impl Plugin for CollisionPlugin {
                     .label(CollisionSystems)
                     .with_system(collision_system.system())
                     .with_system(trigger_area_system.system()),
-            )
-            .add_plugin(DebugCollisionPlugin);
+            );
+
+        if cfg!(debug_assertions) {
+            app.add_plugin(DebugCollisionPlugin);
+        }
     }
 }
 
