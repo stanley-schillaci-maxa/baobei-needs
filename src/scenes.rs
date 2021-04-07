@@ -48,7 +48,7 @@ pub fn load_sprite_system(
 
         let path = PathBuf::from(sprite_loader.path.clone());
 
-        commands.insert(
+        commands.insert_bundle(
             entity,
             SpriteBundle {
                 material: materials.add(asset_server.load(path).into()),

@@ -189,7 +189,7 @@ pub fn handle_actions_system(
 
                     commands.remove_one::<Parent>(item_to_drop);
                     commands.remove_one::<CarriedItem>(item_to_drop);
-                    commands.insert(
+                    commands.insert_bundle(
                         item_to_drop,
                         (
                             Position(didi_position.0 + picked_item_translation * didi_scale),
@@ -204,9 +204,9 @@ pub fn handle_actions_system(
             }
             ActionEvent::PickUp(item_entity, item) => {
                 info!("Pick up the item {:?}", item);
-                commands.insert_one(didi, Carrying(*item));
+                commands.insert(didi, Carrying(*item));
 
-                commands.insert_one(*item_entity, CarriedItem);
+                commands.insert(*item_entity, CarriedItem);
                 commands.remove_one::<Position>(*item_entity);
                 commands.remove_one::<TriggerArea>(*item_entity);
                 commands.push_children(didi, &[*item_entity]);
@@ -218,7 +218,7 @@ pub fn handle_actions_system(
             }
             ActionEvent::Take(item) => {
                 info!("Take item {:?}", item);
-                commands.insert_one(didi, Carrying(*item));
+                commands.insert(didi, Carrying(*item));
 
                 let item_in_hand = commands
                     .spawn(SpriteBundle {

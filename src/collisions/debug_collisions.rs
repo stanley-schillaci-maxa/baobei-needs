@@ -75,7 +75,7 @@ fn add_collider_viewer_system(
     non_viewed_trigger_areas: Query<(Entity, &TriggerArea, &Position), Without<ViewedTriggerArea>>,
 ) {
     for (entity, collider, pos) in non_viewed_colliders.iter() {
-        commands.insert_one(entity, ViewedCollider);
+        commands.insert(entity, ViewedCollider);
 
         let viewer = spawn_viewer(
             commands,
@@ -91,7 +91,7 @@ fn add_collider_viewer_system(
             .push(viewer);
     }
     for (entity, trigger_area, pos) in non_viewed_trigger_areas.iter() {
-        commands.insert_one(entity, ViewedTriggerArea);
+        commands.insert(entity, ViewedTriggerArea);
 
         let viewer = spawn_viewer(
             commands,
