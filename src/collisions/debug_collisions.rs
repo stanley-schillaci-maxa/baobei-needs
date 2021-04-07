@@ -18,8 +18,7 @@ impl Plugin for DebugCollisionPlugin {
             .add_system_set(
                 SystemSet::on_update(GameState::InGame)
                     .with_system(add_collider_viewer_system.system())
-                    .with_system(update_collider_viewers_system.system())
-                    .with_system(refresh_collider_viewers_system.system()),
+                    .with_system(update_collider_viewers_system.system()),
             );
     }
 }
@@ -138,35 +137,6 @@ fn update_collider_viewers_system(
                         .unwrap_or_default();
 
                     *viewer_pos = forwarded_position(pos.0 + offset);
-                }
-            }
-        }
-    }
-}
-
-/// Refresh the position of collision viewers when the player presses `D`.
-fn refresh_collider_viewers_system(
-    mut commands: Commands,
-    keyboard_input: Res<Input<KeyCode>>,
-    all_viewers: Res<ColliderViewers>,
-    collider_positions: Query<&Position, Without<DebugViewer>>,
-    mut viewer_positions: Query<&mut Position, With<DebugViewer>>,
-    box_colliders: Query<&BoxCollider>,
-) {
-    if keyboard_input.just_pressed(KeyCode::D) {
-        for (collider, viewers) in &all_viewers.0 {
-            for viewer in viewers {
-                if let Ok(pos) = collider_positions.get(*collider) {
-                    if let Ok(mut viewer_pos) = viewer_positions.get_mut(*viewer) {
-                        let offset = box_colliders
-                            .get(*collider)
-                            .map(|col| col.offset)
-                            .unwrap_or_default();
-
-                        *viewer_pos = forwarded_position(pos.0 + offset);
-                    }
-                } else {
-                    commands.entity(*viewer).despawn();
                 }
             }
         }
