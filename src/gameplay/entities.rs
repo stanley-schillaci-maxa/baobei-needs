@@ -49,11 +49,7 @@ fn setup_camera(mut commands: Commands) {
 fn spawn_background(mut commands: Commands, materials: Res<GameplayMaterials>) {
     commands.spawn().insert_bundle(SpriteBundle {
         material: materials.background_sprite.clone(),
-        transform: Transform::from_translation(Vec3::new(
-            WINDOW_WIDTH / 2.0,
-            WINDOW_HEIGHT / 2.0,
-            0.0,
-        )),
+        transform: Transform::from_xyz(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT / 2.0, 0.0),
         ..SpriteBundle::default()
     });
 }
