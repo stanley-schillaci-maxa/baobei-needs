@@ -24,8 +24,6 @@ mod gameplay;
 mod menu;
 mod scenes;
 
-use bevy::prelude::*;
-
 use collisions::CollisionPlugin;
 use constants::{GameState, WINDOW_HEIGHT, WINDOW_WIDTH};
 use controllers::ControllerPlugin;
